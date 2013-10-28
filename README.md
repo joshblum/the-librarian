@@ -1,4 +1,4 @@
-the-librarian
+The Librarian
 =============
 
-The Librarian: Entity Matching Across Media Types
+Entity Matching Across Media Types
