@@ -117,30 +117,34 @@ class ActorDB(object):
     def _fetchall(self, query):
         return self.cursor.execute(query).fetchall()
 
-    def query_name(self, name_token):
-        """
-            find the intersection of all first and 
-            last names are within len_diff size of the given name
-        """
+    def _process_query(self, query):
+        return map(lambda x: " ".join(x), self._fetchall(query))
+
+    def _get_name_token_values(self, name_token):
         f_name, l_name = parse_name(name_token)
         values = {
             'f_name': f_name,
             'l_name': l_name,
         }
         values.update(self.config)
+        return values
+
+    def query_close_name(self, name_token):
+        """
+            find the intersection of all first and 
+            last names are within len_diff size of the given name
+        """
+        values = self._get_name_token_values(name_token)
         query = """SELECT f_name, l_name FROM %(table_name)s 
                 WHERE ABS(LENGTH(f_name) - LENGTH('%(f_name)s')) <= %(len_diff)s
                 AND ABS(LENGTH(l_name) - LENGTH('%(l_name)s')) <= %(len_diff)s""" % values
-        return self._fetchall(query)
+        return self._process_query(query)
 
-    def get_name_id_pairs(self, names):
-        values = {
-            'names': names,
-        }
-        values.update(self.config)
-        query =  """SELECT name, id FROM %(table_name)s 
-                WHERE name in %(names)s""" % values
-        return self.cursor.execute(query).fetchall()
+    def query_name(self, name_token):
+        values = self._get_name_token_values(name_token)
+        query = """SELECT f_name, l_name FROM %(table_name)s 
+                WHERE f_name='%(f_name)s' AND l_name='%(l_name)s'""" % values
+        return self._process_query(query)
 
 
 def download_file(url):

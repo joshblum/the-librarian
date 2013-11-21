@@ -9,5 +9,5 @@ SQL_CONFIG = {
 	'csv_file' : 'actors.csv',
 	'table_name' : 'actors',
 	'cols' : ACTORS_CSV_HEADER,
-	'len_diff' : 1,
+	'len_diff' : 0,
 }

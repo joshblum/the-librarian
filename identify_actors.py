@@ -15,11 +15,11 @@ MIN_FUZZ_SCORE = 85
 tmdb.configure(TMDB_API_KEY)
 db = ActorDB()
 
-def identify_actors(clean_text):
+def get_film_intersection(tokens, match_func):
     films = set([])
-    for name_token in clean_text:
+    for name_token in tokens:
         print 'name:', name_token
-        matches = _normalize_text(name_token) #[(actor names, score)]
+        matches = match_func(name_token) #[(actor names, score)]
         print 'matches:', matches
         potential_actors = map(find_films, matches)#[[film_set1, filmset_2, ...], [...]]
         print 'potential_actors:', potential_actors
@@ -33,12 +33,24 @@ def identify_actors(clean_text):
 
     return min(films)
 
-def _normalize_text(name_token):
+def identify_actors(tokens):
+    direct_match = get_film_intersection(tokens, _direct_query_match)
+    if len(direct_match) != 0 and len(direct_match) <= MIN_INTERSECTION:
+        return direct_match
+
+    normalized_match = get_film_intersection(tokens, _normalize_text_match)
+    return direct_match.intersection(normalized_match)
+
+
+def _direct_query_match(name_token):
+    return db.query_name(name_token)
+
+def _normalize_text_match(name_token):
     """
         Perform fuzzing matching to try and match name tokens
     """
     print "normalize_text: name_token:", name_token
-    choices = map(lambda x: " ".join(x), db.query_name(name_token))
+    choices = db.query_close_name(name_token)
     print 'normalize_text: choices:', len(choices)
     matches = process.extractOne(name_token, choices)
     print 'normalize_text: matches', matches
@@ -67,4 +79,4 @@ def merge_sets(sets1, sets2):
 
 if __name__ == "__main__":
     clean_text = ['craig van hook', 'olga merediz', 'eva mendes', 'rev john facci', 'ryan gosling',]
-    identify_actors(clean_text)
+    print identify_actors(clean_text)
