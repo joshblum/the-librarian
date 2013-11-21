@@ -1,14 +1,15 @@
 """
     utils module containing common helper functions
 """
-from constants import SQL_CONFIG, MIN_NAME_L, MAX_NAME_L
-
+from constants import SQL_CONFIG, MIN_L, MAX_L, MIN_NAME_L, MAX_NAME_L
+import requests
 import cPickle
 import shutil
 import uuid
 import os
 import csv
 import sqlite3
+import zipfile
 
 ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -55,7 +56,7 @@ def write_log(file_name, data, path=""):
     try:
         print "Writing %s, %d lines long" % (file_name, len(data))
     except:
-        pass
+        print "Writing %s" % file_name
     with open("%s/%s" % (path, file_name), 'w') as f:
         f.write(str(data))
 
@@ -64,7 +65,7 @@ def parse_name(name):
         returns a tuple of first name last name
         if it exists or None
     """
-    name = name.split()
+    name = name.lower().split()
     if not valid_name_size(name):
         return "", ""
     return name[0], " ".join(name[1:])
@@ -73,7 +74,7 @@ def valid_name_size(split_name):
     return _between_values(split_name, MIN_NAME_L, MAX_NAME_L, inclusive=True)
 
 def valid_token_size(token):
-    return _between_values(split_name, MIN_NAME_L, MAX_NAME_L)
+    return _between_values(token, MIN_L, MAX_L)
 
 def _between_values(size, min_size, max_size, inclusive=False):
     assert min_size <= max_size
@@ -114,13 +115,14 @@ class ActorDB(object):
         self.cursor = self.con.cursor()
 
     def _fetchall(self, query):
-        return flatten(self.cursor.execute(query).fetchall())
+        return self.cursor.execute(query).fetchall()
 
-    def query_name(self, f_name, l_name):
+    def query_name(self, name_token):
         """
             find the intersection of all first and 
             last names are within len_diff size of the given name
         """
+        f_name, l_name = parse_name(name_token)
         values = {
             'f_name': f_name,
             'l_name': l_name,
@@ -128,8 +130,7 @@ class ActorDB(object):
         values.update(self.config)
         query = """SELECT f_name, l_name FROM %(table_name)s 
                 WHERE ABS(LENGTH(f_name) - LENGTH('%(f_name)s')) <= %(len_diff)s
-                AND
-                WHERE ABS(LENGTH(l_name) - LENGTH('%(l_name)s')) <= %(len_diff)s""" % values
+                AND ABS(LENGTH(l_name) - LENGTH('%(l_name)s')) <= %(len_diff)s""" % values
         return self._fetchall(query)
 
     def get_name_id_pairs(self, names):
@@ -140,3 +141,29 @@ class ActorDB(object):
         query =  """SELECT name, id FROM %(table_name)s 
                 WHERE name in %(names)s""" % values
         return self.cursor.execute(query).fetchall()
+
+
+def download_file(url):
+    local_filename = url.split('/')[-1]
+    r = requests.get(url, stream=True)
+    with open(local_filename, 'wb') as f:
+        for chunk in r.iter_content(chunk_size=1024): 
+            if chunk:
+                f.write(chunk)
+                f.flush()
+    return local_filename
+
+def unzip_file(filename, dest_dir="."):
+    with zipfile.ZipFile(filename) as zf:
+        for member in zf.infolist():
+            # Path traversal defense copied from
+            # http://hg.python.org/cpython/file/tip/Lib/http/server.py#l789
+            words = member.filename.split('/')
+            path = dest_dir
+            for word in words[:-1]:
+                drive, word = os.path.splitdrive(word)
+                head, word = os.path.split(word)
+                if word in (os.curdir, os.pardir, ''): continue
+                path = os.path.join(path, word)
+            zf.extract(member, path)
+

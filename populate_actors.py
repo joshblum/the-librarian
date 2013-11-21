@@ -1,74 +1,71 @@
-"""
-    Scrape the most popular actors from the TMDB api and output to a file
-"""
-
-from tmdb import tmdb
-from constants import TMDB_API_KEY, PROGRESS, MAX_L, MIN_L, ACTORS_CSV_HEADER
-from utils import parse_name
+from constants import ACTORS_CSV_HEADER, PROGRESS
+from utils import parse_name, valid_token_size, flatten
 import csv
 
-tmdb.configure(TMDB_API_KEY)
-
+TMDB_FILE_NAME = "tmdb_actors.csv"
+OMDB_FILE_NAME = "omdb_actors.csv"
 OUTPUT_FILE = "actors.csv"
+INPUT_FILES = [TMDB_FILE_NAME, OMDB_FILE_NAME]
 
 
-def populate_actors_file(write_file=OUTPUT_FILE, limit=False):
-    tmp_name = "%s.tmp" % write_file
-    scrape_actors(tmp_name, limit=limit)
+def populate_actors_file(input_files=INPUT_FILES,
+                         write_file=OUTPUT_FILE, cleanup=True):
 
-    clean_scraped_data(tmp_name, write_file)
+    data = set(
+        map(tuple, 
+            flatten(
+                map(clean_scraped_data, input_files)
+            )
+        )
+    )
+    data_dicts = map(lambda x: {
+            'f_name' : x[0],
+            'l_name' : x[1],
+        }, data)
+    write_scraped_data(write_file, data_dicts)
 
-def scrape_actors(write_file, limit=False):
-    """
-        Call the tmdb api and write results of popular
-        actors to the given file path
-    """
-    popular = tmdb.Popular(limit=limit)
+    if cleanup:
+        map(os.remove, INPUT_FILES)
 
-    with open(write_file, "w") as f_write:
-        writer = csv.DictWriter(f_write, ACTORS_CSV_HEADER)
-        writer.writeheader()
-        for i, res in enumerate(popular.iter_results()):
-            if not isinstance(res, dict):
-                continue
-            writer.writerow(_clean_res(res))
-            if not i % PROGRESS:
-                print "Found %d actors" % i
-    print "Found %d actors" % i
-
-def _clean_res(res):
-    clean_res = {}
-    for k, v in res.iteritems():
-        try:
-            clean_res[k] = v.encode('ascii', 'ignore')
-            if k == "name":
-                del clean_res['name']
-                first, last = parse_name(v)
-                clean_res['f_name'] = first
-                clean_res['l_name'] = last
-
-        except:
-            continue
-    return clean_res
-
-def clean_scraped_data(in_file, out_file):
-    with open(in_file) as f_read, open(out_file, 'w') as f_write:
+def clean_scraped_data(in_file):
+    with open(in_file) as f_read:
         reader = csv.DictReader(f_read)
-        writer = csv.DictWriter(f_write, ACTORS_CSV_HEADER)
-        writer.writeheader()
+        data = []
         dirty = 0
-        for line in reader:
-            if _clean_line(line):
-                writer.writerow(line)
+        for i, line in enumerate(reader):
+            if _is_clean_line(line):
+                line = _process_line(line)
+                data.append(line)
             else:
                 dirty += 1
+
+            if not i % PROGRESS:
+                print "Processed %d lines" % i
+
     print "Removed %d dirty lines." % dirty
+    return data
 
-def _clean_line(line):
-    return _valid_name(line['f_name']) and _valid_name(line['l_name'])
 
-def _valid_name(name):
-    return len(name) > MIN_L and len(name) < MAX_L
+def write_scraped_data(write_file, data):
+    with open(write_file, 'w') as f_write:
+        writer = csv.DictWriter(f_write, ACTORS_CSV_HEADER)
+        writer.writeheader()
+        writer.writerows(data)
+
+def _is_clean_line(line):
+    return valid_token_size(line['f_name']) and valid_token_size(line['l_name'])
+
+
+def _process_line(line):
+    line = [line[k].lower() for k in ACTORS_CSV_HEADER]
+    for i in range(len(line)):
+        try:
+            val = line[i].encode('ascii', 'ignore')
+        except:
+            val = ""
+        line[i] = val
+    return line
+
 
 if __name__ == "__main__":
-    populate_actors_file(limit=True)
+    populate_actors_file(cleanup=True)
