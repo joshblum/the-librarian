@@ -1,20 +1,24 @@
 """
-Given a path to a worker directory, 
-gathers text and returns a set of possible actors
+    Given a path to a worker directory, 
+    gathers text and returns a set of possible actors
 """
-from constants import MIN_L, MAX_L, MIN_NAME_L, MAX_NAME_L
-from utils import flatten, write_log, ActorDB, valid_token_size, valid_name_size, parse_name
+
+from utils import parse_name
+from librarian.utils import flatten, write_log
+from fuzzywuzzy import process
 from pytesser import pytesser
 from glob import glob
 
-from fuzzywuzzy import process
+from utils import valid_token_size, valid_name_size
+from constants import MIN_L, MAX_L, MIN_NAME_L, MAX_NAME_L
 
 import string
 import itertools
 
 EXT = ".png"
 
-def get_actors(path, wildcard=EXT):
+
+def extract_credits(path, wildcard=EXT):
     """
         path: Input path where processed movie is contained
         Performs OCR on each image found at path/*wildcard.
@@ -34,11 +38,15 @@ def get_actors(path, wildcard=EXT):
 
     return clean_text
 
+
 def _text_from_img(img_path):
     """
         return the text results of pytesser OCR
     """
+    # potential optimization:
+    # only OCR that are x% black
     return pytesser.image_file_to_string(img_path)
+
 
 def _split_text(clean_text):
     """
@@ -46,6 +54,7 @@ def _split_text(clean_text):
     """
     return flatten(map(
         lambda tokens: map(parse_name, tokens), clean_text))
+
 
 def _map_args(func, arg1, arg2):
     """
@@ -69,14 +78,14 @@ class StringCleaner(object):
             and clearing whitespace
         """
         return self._filter_tokens(
-                self._strip_tokens(
-                    self._asciify(
-                        self._rm_punc(
-                            self._tokenize(s)
-                        )
+            self._strip_tokens(
+                self._asciify(
+                    self._rm_punc(
+                        self._tokenize(s)
                     )
                 )
             )
+        )
 
     def _tokenize(self, s):
         return s.lower().split("\n")
@@ -98,8 +107,8 @@ class StringCleaner(object):
         return map(lambda s: s.strip(), s_list)
 
     def _filter_tokens(self, s):
-        return set(filter(lambda x: valid_token_size(x) \
-            and valid_name_size(x.split()), s))
+        return set(filter(lambda x: valid_token_size(x)
+                          and valid_name_size(x.split()), s))
 
 if __name__ == "__main__":
-    print get_actors('tmp/img')
+    print extract_credits('tmp/img')
