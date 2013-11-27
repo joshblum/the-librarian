@@ -1,6 +1,8 @@
 """
     utils module containing common helper functions
 """
+
+from datetime import datetime, timedelta
 from constants import SQL_CONFIG, MIN_L, MAX_L, MIN_NAME_L, MAX_NAME_L
 import requests
 import cPickle
@@ -12,6 +14,8 @@ import sqlite3
 import zipfile
 
 ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
+MIN = 5
+FMT = "%H:%M:%S"
 
 
 def _create_path():
@@ -60,6 +64,7 @@ def write_log(file_name, data, path=""):
     with open("%s/%s" % (path, file_name), 'w') as f:
         f.write(str(data))
 
+
 def parse_name(name):
     """
         returns a tuple of first name last name
@@ -70,21 +75,25 @@ def parse_name(name):
         return "", ""
     return name[0], " ".join(name[1:])
 
+
 def valid_name_size(split_name):
     return _between_values(split_name, MIN_NAME_L, MAX_NAME_L, inclusive=True)
 
+
 def valid_token_size(token):
     return _between_values(token, MIN_L, MAX_L)
+
 
 def _between_values(size, min_size, max_size, inclusive=False):
     assert min_size <= max_size
     try:
         size = len(size)
-    except TypeError: 
+    except TypeError:
         pass
     if inclusive:
         return size >= min_size and size <= max_size
     return size > min_size and size < max_size
+
 
 def csv_to_sql(in_file, table_name, cols):
     cols_str = ", ".join(cols)
@@ -151,11 +160,12 @@ def download_file(url):
     local_filename = url.split('/')[-1]
     r = requests.get(url, stream=True)
     with open(local_filename, 'wb') as f:
-        for chunk in r.iter_content(chunk_size=1024): 
+        for chunk in r.iter_content(chunk_size=1024):
             if chunk:
                 f.write(chunk)
                 f.flush()
     return local_filename
+
 
 def unzip_file(filename, dest_dir="."):
     with zipfile.ZipFile(filename) as zf:
@@ -167,7 +177,14 @@ def unzip_file(filename, dest_dir="."):
             for word in words[:-1]:
                 drive, word = os.path.splitdrive(word)
                 head, word = os.path.split(word)
-                if word in (os.curdir, os.pardir, ''): continue
+                if word in (os.curdir, os.pardir, ''):
+                    continue
                 path = os.path.join(path, word)
             zf.extract(member, path)
 
+
+def get_time_delta(date):
+    date = date.split(".")[0]
+    date = datetime.strptime(date, FMT)
+    delta = timedelta(minutes=MIN)
+    return (date - delta).strftime(FMT)
