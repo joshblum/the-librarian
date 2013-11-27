@@ -1,3 +1,5 @@
+import os 
+
 TMDB_API_KEY = "04a87a053afac639272eefbb94a173e4"
 MAX_L = 30
 MIN_L = 3
@@ -11,3 +13,4 @@ SQL_CONFIG = {
 	'cols' : ACTORS_CSV_HEADER,
 	'len_diff' : 0,
 }
+ROOT_PATH = os.path.dirname(os.path.realpath(__file__))

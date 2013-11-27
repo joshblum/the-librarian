@@ -3,7 +3,7 @@
 """
 
 from datetime import datetime, timedelta
-from constants import SQL_CONFIG, MIN_L, MAX_L, MIN_NAME_L, MAX_NAME_L
+from constants import SQL_CONFIG, MIN_L, MAX_L, MIN_NAME_L, MAX_NAME_L, ROOT_PATH
 import requests
 import cPickle
 import shutil
@@ -13,19 +13,8 @@ import csv
 import sqlite3
 import zipfile
 
-ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
 MIN = 5
 FMT = "%H:%M:%S"
-
-
-def _create_path():
-    """
-        create a directory and return the absolute path
-    """
-    dirname = str(uuid.uuid4())
-    path = os.path.join(ROOT_PATH, dirname)
-    os.mkdir(path)
-    return path
 
 
 def tmp_dir_wrap(func):
