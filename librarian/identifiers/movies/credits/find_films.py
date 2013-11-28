@@ -29,15 +29,11 @@ def find_films(tokens):
 def get_film_intersection(tokens, match_func):
     films = set([])
     for name_token in tokens:
-        print 'name:', name_token
         matches = match_func(name_token)  # [(actor names, score)]
-        print 'matches:', matches
         #[[film_set1, filmset_2, ...], [...]]
         potential_actors = map(get_films, matches)
-        print 'potential_actors:', potential_actors
         if not len(potential_actors):
             continue
-        print 'films:', films
 
         #[film_interset1, film_interset2...]
         films = reduce(merge_sets, potential_actors)
@@ -55,22 +51,17 @@ def _normalize_text_match(name_token):
     """
         Perform fuzzing matching to try and match name tokens
     """
-    print "normalize_text: name_token:", name_token
     choices = db.query_close_name(name_token)
-    print 'normalize_text: choices:', len(choices)
     matches = process.extractOne(name_token, choices)
-    print 'normalize_text: matches', matches
     if not isinstance(matches, list):
         matches = [matches]
 
     filtered_matches = filter(
         lambda x: x is not None and x[1] > MIN_FUZZ_SCORE, matches)
-    print "normalize_text:filtered_matches:", filtered_matches
     return map(lambda x: x[0], filtered_matches)
 
 
-def get_films(actor_name):
-    print actor_name
+def get_films(actor_name):    
     people = tmdb.People(actor_name)
     return [set([movie.get_original_title() for movie in person.cast()])
             for person in people]

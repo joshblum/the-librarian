@@ -18,15 +18,6 @@ FMT = "%H:%M:%S"
 def flatten(l):
     return [item for sublist in l for item in sublist]
 
-
-def write_log(file_name, data, path=""):
-    try:
-        print "Writing %s, %d lines long" % (file_name, len(data))
-    except:
-        print "Writing %s" % file_name
-    with open("%s/%s" % (path, file_name), 'w') as f:
-        f.write(str(data))
-
 def between_values(size, min_size, max_size, inclusive=False):
     assert min_size <= max_size
     try:

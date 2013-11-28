@@ -3,12 +3,15 @@
     Requires a filename on object creation.
     Requires an _identify and  cleanup method.
 """
-from librarian.constants import WORKSPACE_PATH, OMDB_API_URL
-
+from librarian.constants import WORKSPACE_PATH, OMDB_API_URL, LOGGING
+import logging.config
 import requests
 import shutil
 import uuid
 import os
+
+logging.config.dictConfig(LOGGING)
+logger = logging.getLogger(__name__)
 
 
 class Identifier(object):
@@ -40,8 +43,11 @@ class Identifier(object):
         """
 
         titles = self.find_titles()
+        logger.debug("Found titles %s." % titles)
         self.cleanup_workspace()
-        return self.get_title_metadata(titles)
+        metadata =  self.get_title_metadata(titles)
+        logger.debug("Metadata %s" % metadata)
+        return metadata
 
     def find_titles(self):
         """
@@ -64,6 +70,7 @@ class Identifier(object):
             Clear the tmp workspace if required
         """
         if self.cleanup:
+            logger.debug("Removing dir %s", self.path)
             shutil.rmtree(self.path)
 
 

@@ -4,7 +4,8 @@
 """
 
 from utils import parse_name
-from librarian.utils import flatten, write_log
+from librarian.constants import LOGGING
+from librarian.utils import flatten
 from fuzzywuzzy import process
 from pytesser import pytesser
 from glob import glob
@@ -14,9 +15,12 @@ from constants import MIN_L, MAX_L, MIN_NAME_L, MAX_NAME_L
 
 import string
 import itertools
+import logging.config
 
 EXT = ".png"
 
+logging.config.dictConfig(LOGGING)
+logger = logging.getLogger(__name__)
 
 def extract_credits(path, wildcard=EXT):
     """
@@ -26,15 +30,16 @@ def extract_credits(path, wildcard=EXT):
         match to known actors and actresses. 
         A set of names is returned.
     """
-
+    logger.debug("Extracting credits at %s" % path)
+    
     cleaner = StringCleaner()
-    img_paths = glob("%s/*%s" % (path, wildcard))
 
+    img_paths = glob("%s/*%s" % (path, wildcard))
     img_text = map(_text_from_img, img_paths)
-    write_log('img_text', img_text, path=path)
+    logger.debug("img_text %s" % img_text)
 
     clean_text = flatten(map(cleaner.clean, img_text))
-    write_log('clean_text', clean_text, path=path)
+    logger.debug("clean_text %s" % clean_text)
 
     return clean_text
 
