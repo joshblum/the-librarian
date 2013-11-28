@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class Identifier(object):
 
-    def __init__(self, srcfile, cleanup=False):
+    def __init__(self, srcfile, cleanup=True):
         self.srcfile = srcfile
         self.cleanup = cleanup
         self.path = self.create_workspace()
@@ -97,9 +97,18 @@ class HashIdentifier(Identifier):
 
     def get_titles(self):
         md5 = md5_for_file(self.srcfile)
-        logger.debug("MD5 hash %s for %s" % (self.srcfile, md5))
+        logger.debug("MD5 hash %s for %s" % (md5, self.srcfile))
         #TODO query metastore for match for hash
         return md5
+
+    def get_title_metadata(self, titles):
+        #TODO, call metastore for anymatches found
+        raise NotImplementedError
+
+class TitleIdentifier(Identifier):
+
+    def get_titles(self):
+        raise NotImplementedError
 
     def get_title_metadata(self, titles):
         #TODO, call metastore for anymatches found

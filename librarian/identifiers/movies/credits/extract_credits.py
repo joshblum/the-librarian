@@ -22,6 +22,7 @@ EXT = ".png"
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger(__name__)
 
+
 def extract_credits(path, wildcard=EXT):
     """
         path: Input path where processed movie is contained
@@ -31,11 +32,11 @@ def extract_credits(path, wildcard=EXT):
         A set of names is returned.
     """
     logger.debug("Extracting credits at %s" % path)
-    
+
     cleaner = StringCleaner()
 
     img_paths = glob("%s/*%s" % (path, wildcard))
-    img_text = map(_text_from_img, img_paths)
+    img_text = [_text_from_img(img_path, path) for img_path in img_paths]
     logger.debug("img_text %s" % img_text)
 
     clean_text = flatten(map(cleaner.clean, img_text))
@@ -44,13 +45,13 @@ def extract_credits(path, wildcard=EXT):
     return clean_text
 
 
-def _text_from_img(img_path):
+def _text_from_img(img_path, path):
     """
         return the text results of pytesser OCR
     """
     # potential optimization:
     # only OCR that are x% black
-    return pytesser.image_file_to_string(img_path)
+    return pytesser.image_file_to_string(img_path, path=path)
 
 
 def _split_text(clean_text):

@@ -19,7 +19,7 @@ db = ActorDB()
 
 def find_films(tokens):
     direct_match = get_film_intersection(tokens, _direct_query_match)
-    if len(direct_match) != 0 and len(direct_match) <= MIN_INTERSECTION:
+    if len(direct_match) and len(direct_match) <= MIN_INTERSECTION:
         return direct_match
 
     normalized_match = get_film_intersection(tokens, _normalize_text_match)
@@ -37,11 +37,11 @@ def get_film_intersection(tokens, match_func):
 
         #[film_interset1, film_interset2...]
         films = reduce(merge_sets, potential_actors)
-        if len(min(films)) <= MIN_INTERSECTION:
+        if len(films) and len(min(films)) <= MIN_INTERSECTION:
             break
     
     if not len(films):
-        return None
+        return films
     
     return min(films)
 

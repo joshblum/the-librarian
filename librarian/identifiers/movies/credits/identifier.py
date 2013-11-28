@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 
 class MovieCreditIdentifier(MovieIdentifier):
 
-    def __init__(self, srcfile):
-        super(MovieIdentifier, self).__init__(srcfile)
+    def __init__(self, srcfile, cleanup=True):
+        super(MovieIdentifier, self).__init__(srcfile, cleanup)
         self.credits_path = "%s/credits" % self.path
         os.mkdir(self.credits_path)
 
