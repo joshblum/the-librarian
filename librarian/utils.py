@@ -5,6 +5,7 @@
 from datetime import datetime, timedelta
 from constants import ROOT_PATH
 
+import hashlib
 import requests
 import os
 import csv
@@ -81,3 +82,18 @@ def get_time_delta(date):
     date = datetime.strptime(date, FMT)
     delta = timedelta(minutes=MIN)
     return (date - delta).strftime(FMT)
+
+
+def md5_for_file(path, block_size=256*128, hr=False):
+    """
+    Block size directly depends on the block size of your filesystem
+    to avoid performances issues
+    Here I have blocks of 4096 octets (Default NTFS)
+    """
+    md5 = hashlib.md5()
+    with open(path,'rb') as f: 
+        for chunk in iter(lambda: f.read(block_size), b''): 
+             md5.update(chunk)
+    if hr:
+        return md5.hexdigest()
+    return md5.digest()

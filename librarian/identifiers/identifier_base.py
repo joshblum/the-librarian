@@ -4,6 +4,7 @@
     Requires an _identify and  cleanup method.
 """
 from librarian.constants import WORKSPACE_PATH, OMDB_API_URL, LOGGING
+from librarian.utils import md5_for_file
 import logging.config
 import requests
 import shutil
@@ -42,14 +43,14 @@ class Identifier(object):
             Returns a list of JSON encoded objects for results
         """
 
-        titles = self.find_titles()
+        titles = self.get_titles()
         logger.debug("Found titles %s." % titles)
         self.cleanup_workspace()
-        metadata =  self.get_title_metadata(titles)
+        metadata = self.get_title_metadata(titles)
         logger.debug("Metadata %s" % metadata)
         return metadata
 
-    def find_titles(self):
+    def get_titles(self):
         """
             Abstract method which returns a list of titles 
             for a given srcfile or returns None if no titles
@@ -90,3 +91,16 @@ class MovieIdentifier(Identifier):
             if r['Response']:
                 res.append(r)
         return res
+
+
+class HashIdentifier(Identifier):
+
+    def get_titles(self):
+        md5 = md5_for_file(self.srcfile)
+        logger.debug("MD5 hash %s for %s" % (self.srcfile, md5))
+        #TODO query metastore for match for hash
+        return md5
+
+    def get_title_metadata(self, titles):
+        #TODO, call metastore for anymatches found
+        raise NotImplementedError

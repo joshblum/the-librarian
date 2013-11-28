@@ -23,7 +23,7 @@ class MovieCreditIdentifier(MovieIdentifier):
         self.credits_path = "%s/credits" % self.path
         os.mkdir(self.credits_path)
 
-    def find_titles(self):
+    def get_titles(self):
 
         extract_frames(self.srcfile, self.path, self.credits_path)
         logger.debug("Retrieving credit tokens.")
@@ -37,6 +37,7 @@ class MovieCreditIdentifier(MovieIdentifier):
 
 
 if __name__ == "__main__":
-    ident = MovieCreditIdentifier(
-        '/Users/joshblum/Downloads/tmp/test.mp4')
-    print ident.identify()
+    import sys
+    if len(sys.argv) > 1:
+        ident = MovieCreditIdentifier(sys.argv[1])
+        print ident.identify()

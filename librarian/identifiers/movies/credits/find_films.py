@@ -39,7 +39,10 @@ def get_film_intersection(tokens, match_func):
         films = reduce(merge_sets, potential_actors)
         if len(min(films)) <= MIN_INTERSECTION:
             break
-
+    
+    if not len(films):
+        return None
+    
     return min(films)
 
 
