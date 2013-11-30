@@ -6,13 +6,18 @@
     Responsible for adding data to the metastore
     if an entity is identified.
 """
-from librarian.constants import WORKSPACE_PATH, LOGGING
+from librarian.constants import WORKSPACE_PATH, LOGGING, VIDEO_EXT
 from librarian.utils import md5_for_file
+from librarian.identifiers.identifiers import HashIdentifier, TitleIdentifier
+from librarian.identifiers.movies.credits.identifier import MovieCreditIdentifier
+# from librarian.identifiers.movies.fingerprint.identifier import AudioFingerprintIdentifier
+
 import logging.config
 
 import os
 import uuid
 import shutil
+import glob
 
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger(__name__)
@@ -28,12 +33,34 @@ class Handler(object):
         self.srcpath = srcpath
         self.cleanup = cleanup
 
-        # set by init_job
-        self.path = None
-        self.job_id = None
+        self.srcfile = self.set_srcfile()
+        self.init_job()
 
-        # subclasses must set this attribute
-        self.srcfile = None
+    def init_job(self, srcfile):
+        """
+            Initialize and insert the job into the metastore.
+            Adds job_id, path, and contents hash.
+            Used by subclasses after self.srcfile is set.
+            returns the job_id for the job
+        """
+        # TODO
+        # if self.srcpath in datastore:
+            # self.job_id = old_id
+            # self.path = self.create_workspace()
+        # else:
+            # self.job_id = str(uuid.uuid4())
+            #self.md5 = self.get_content_hash()
+            # self.path = self.create_workspace()
+            # insert job_id, md5, path into datastore
+        raise NotImplementedError
+
+    def finish_job(self, metadata):
+        """
+            Close the job out and add the metadata
+            to the metastore
+        """
+        #TODO
+        raise NotImplementedError
 
     def create_workspace(self):
         """
@@ -57,6 +84,13 @@ class Handler(object):
             logger.debug("Removing dir %s", self.path)
             shutil.rmtree(self.path)
 
+    def add_entity_metadata(self, metadata):
+        """
+            Add the metadata to the datastore
+        """
+        # TODO
+        raise NotImplementedError
+
     def update_progress(self, status, msg=""):
         """
             Update the status of the current job
@@ -65,27 +99,18 @@ class Handler(object):
         # TODO
         raise NotImplementedError
 
-    def init_job(self, srcfile):
+    def get_content_hash(self):
         """
-            Initialize and insert the job into the metastore.
-            Adds job_id, path, and contents hash.
-            Used by subclasses after self.srcfile is set.
-            returns the job_id for the job
+            Returns the hash of self.srcfile
+            self.srcfile is set by subclasses
         """
-        # TODO
-        # if self.srcpath in datastore:
-            # self.job_id = old_id
-            # self.path = self.create_workspace()
-        # else:
-            # self.job_id = str(uuid.uuid4())
-            #content_hash = self.get_content_hash()
-            # self.path = self.create_workspace()
-            #insert job_id, content_hash, path into datastore
-        raise NotImplementedError
 
-    def add_entity_metadata(self):
+        return md5_for_file(self.srcfile)
+
+    def set_srcfile(self):
         """
-            Abstract method to add metadata to the datastore
+            Abstract method to determine what the srcfile
+            is for a given entity handler
         """
         raise NotImplementedError
 
@@ -96,13 +121,55 @@ class Handler(object):
         """
         raise NotImplementedError
 
-    def get_content_hash(self):
-        """
-            Returns the hash of self.srcfile
-            Raises an Exception if self.srcfile is None
-            This attribute must be set by subclasses
-        """
-        if self.srcfile is None:
-            raise Exception("self.srcfile must not be None")
 
-        return md5_for_file(self.srcfile)
+class MovieHandler(Handler):
+
+    def __init__(self, srcpath, cleanup=True):
+        super(Handler, self).__init__(srcpath, cleanup)
+
+    def set_srcfile(self):
+        """
+            Sets the srcfile attribute
+            A single video file is used as the srcfile
+            for a movie. If multiple movies are found,
+            exception is raised.
+            TODO: Join multiple files if found (i.e. movie split into two disks)
+        """
+        files = glob.glob("%s*" % self.srcpath)
+        srcfiles = []
+        for path in files:
+            split_path = path.split(".")
+            if len(split_path) and split_path[-1] in VIDEO_EXT:
+                srcfiles.append(path)
+
+        if len(srcfiles) == 1:
+            return srcfiles[0]
+
+        raise Exception("More than one possible srcfile for %s" % self.srcpath)
+
+    def get_entity_metadata(self):
+        """
+            Tries to identify the srcfile with the following steps
+            1. Simple hash
+            2. Title matching #TODO
+                2.1 srcpath
+                2.2 srcfile
+            3. Credit matching
+            4. Audio fingerprinting #TODO
+        """
+        default_args = (self.srcfile, self.path)
+        identifiers = [(HashIdentifier, (self.srcfile, self.path, self.md5)),
+                       #(TitleIdentifier, (self.srcpath, self.path)),
+                       #(TitleIdentifier, default_args),
+                       (MovieCreditIdentifier, default_args),
+                       #(AudioFingerprintIdentifier default_args),
+                       ]
+        for identifier, args in identifiers:
+            identifier = identifier(*args)
+            metadata = identifier.identify()
+            logger.DEBUG("Running identifier %s, found metadata %s", % (identifier, metadata))
+            #TODO update progress?
+            if metadata is not None:
+                return metadata
+
+        return None

@@ -30,6 +30,8 @@ class Identifier(object):
         logger.debug("Found titles %s." % titles)
         metadata = self.get_title_metadata(titles)
         logger.debug("Metadata %s" % metadata)
+        if not len(metadata):
+            return None
         return metadata
 
     def get_titles(self):
@@ -68,14 +70,20 @@ class MovieIdentifier(Identifier):
 
 class HashIdentifier(Identifier):
 
+    def __init__(self, srcfile, path, md5=None):
+        super(MovieIdentifier, self).__init__(srcfile, path)
+        if md5 is None:
+            md5 = md5_for_file(self.srcfile)
+        self.md5 = md5
+
+
     def get_titles(self):
-        md5 = md5_for_file(self.srcfile)
-        logger.debug("MD5 hash %s for %s" % (md5, self.srcfile))
+        logger.debug("MD5 hash %s for %s" % (self.md5, self.srcfile))
         #TODO query metastore for match for hash
-        return md5
+        return self.md5
 
     def get_title_metadata(self, titles):
-        #TODO, call metastore for anymatches found
+        #TODO, call metastore for any matches found
         raise NotImplementedError
 
 class TitleIdentifier(Identifier):
