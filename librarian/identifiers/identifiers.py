@@ -7,9 +7,6 @@ from librarian.constants import WORKSPACE_PATH, OMDB_API_URL, LOGGING
 from librarian.utils import md5_for_file
 import logging.config
 import requests
-import shutil
-import uuid
-import os
 
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger(__name__)
@@ -17,23 +14,9 @@ logger = logging.getLogger(__name__)
 
 class Identifier(object):
 
-    def __init__(self, srcfile, cleanup=True):
+    def __init__(self, srcfile, path):
         self.srcfile = srcfile
-        self.cleanup = cleanup
-        self.path = self.create_workspace()
-
-    def create_workspace(self):
-        """
-            create a directory and return the absolute path
-        """
-
-        dirname = str(uuid.uuid4())
-        if not os.path.exists(WORKSPACE_PATH):
-            os.mkdir(WORKSPACE_PATH)
-
-        path = os.path.join(WORKSPACE_PATH, dirname)
-        os.mkdir(path)
-        return path
+        self.path = path
 
     def identify(self):
         """
@@ -45,7 +28,6 @@ class Identifier(object):
 
         titles = self.get_titles()
         logger.debug("Found titles %s." % titles)
-        self.cleanup_workspace()
         metadata = self.get_title_metadata(titles)
         logger.debug("Metadata %s" % metadata)
         return metadata
@@ -65,15 +47,6 @@ class Identifier(object):
             returns: a JSON encoded list of results
         """
         raise NotImplementedError
-
-    def cleanup_workspace(self):
-        """
-            Clear the tmp workspace if required
-        """
-        if self.cleanup:
-            logger.debug("Removing dir %s", self.path)
-            shutil.rmtree(self.path)
-
 
 class MovieIdentifier(Identifier):
 

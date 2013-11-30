@@ -4,7 +4,7 @@
 """
 
 from librarian.constants import LOGGING
-from librarian.identifiers.identifier_base import MovieIdentifier
+from librarian.identifiers.identifiers import MovieIdentifier
 from extract_frames import extract_frames
 from extract_credits import extract_credits
 from find_films import find_films
@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 
 class MovieCreditIdentifier(MovieIdentifier):
 
-    def __init__(self, srcfile, cleanup=True):
-        super(MovieIdentifier, self).__init__(srcfile, cleanup)
+    def __init__(self, srcfile, path):
+        super(MovieIdentifier, self).__init__(srcfile, path)
         self.credits_path = "%s/credits" % self.path
         os.mkdir(self.credits_path)
 
@@ -39,5 +39,5 @@ class MovieCreditIdentifier(MovieIdentifier):
 if __name__ == "__main__":
     import sys
     if len(sys.argv) > 1:
-        ident = MovieCreditIdentifier(sys.argv[1])
+        ident = MovieCreditIdentifier(sys.argv[1], "/tmp")
         print ident.identify()
