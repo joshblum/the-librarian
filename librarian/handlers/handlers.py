@@ -179,3 +179,17 @@ class MovieHandler(Handler):
                 return metadata
 
         return None
+
+class DummyHandler(Handler):
+    """
+        Default handler if an entity does not have a valid type
+        Fails the job and adds it to the metastore
+    """
+
+    def set_srcfile(self):
+        return None
+
+    def get_entity_metadata(self):
+        return None
+
+    
