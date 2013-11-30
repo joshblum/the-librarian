@@ -25,12 +25,13 @@ logger = logging.getLogger(__name__)
 
 class Handler(object):
 
-    def __init__(self, srcpath, cleanup=True):
+    def __init__(self, srcpath, job_id, cleanup=True):
         """
             Each subclass must call init_job in their __init__
             method and return the job_id that is set
         """
         self.srcpath = srcpath
+        self.job_id = job_id
         self.cleanup = cleanup
 
         self.srcfile = self.set_srcfile()
@@ -44,15 +45,20 @@ class Handler(object):
             returns the job_id for the job
         """
         # TODO
-        # if self.srcpath in datastore:
-            # self.job_id = old_id
-            # self.path = self.create_workspace()
-        # else:
-            # self.job_id = str(uuid.uuid4())
+        #self.create_workspace()
+        # if not self.srcpath in datastore:
             #self.md5 = self.get_content_hash()
             # self.path = self.create_workspace()
             # insert job_id, md5, path into datastore
+        #return self.job_id
         raise NotImplementedError
+
+    def run(self):
+        """
+            Run the handler.
+        """
+        metadata = self.get_entity_metadata()
+        self.finish_job(metadata)
 
     def finish_job(self, metadata):
         """
