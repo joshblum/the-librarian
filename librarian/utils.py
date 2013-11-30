@@ -19,6 +19,7 @@ FMT = "%H:%M:%S"
 def flatten(l):
     return [item for sublist in l for item in sublist]
 
+
 def between_values(size, min_size, max_size, inclusive=False):
     assert min_size <= max_size
     try:
@@ -84,16 +85,16 @@ def get_time_delta(date):
     return (date - delta).strftime(FMT)
 
 
-def md5_for_file(path, block_size=256*128, hr=False):
+def md5_for_file(path, block_size=256 * 128, hr=False):
     """
     Block size directly depends on the block size of your filesystem
     to avoid performances issues
     Here I have blocks of 4096 octets (Default NTFS)
     """
     md5 = hashlib.md5()
-    with open(path,'rb') as f: 
-        for chunk in iter(lambda: f.read(block_size), b''): 
-             md5.update(chunk)
+    with open(path, 'rb') as f:
+        for chunk in iter(lambda: f.read(block_size), b''):
+            md5.update(chunk)
     if hr:
         return md5.hexdigest()
     return md5.digest()

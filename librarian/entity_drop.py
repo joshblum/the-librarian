@@ -15,25 +15,28 @@ from threading import Thread
 SLEEP = 5
 
 ENTITY_MAP = {
-    'movie' : handlers.MovieHandler,
+    'movie': handlers.MovieHandler,
 }
+
 
 def process_entity():
     while True:
         srcpath, job_id, entity_type = q.get()
-        handler = ENTITY_MAP.get(entity_type, handlers.DummyHandler)(srcpath, job_id)
+        handler = ENTITY_MAP.get(
+            entity_type, handlers.DummyHandler)(srcpath, job_id)
         handler.run()
         q.task_done()
+
 
 def entity_queue():
 
     q = Queue()
     for _ in xrange(MAX_PROCESSES):
-         p = Process(target=process_entity, args=(q,))
-         p.start()
+        p = Process(target=process_entity, args=(q,))
+        p.start()
 
     # while True:
-        #get item from metastore
+        # get item from metastore
         # q.put((srcpath, entity_type))
         # time.sleep(SLEEP)
 

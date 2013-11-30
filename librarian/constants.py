@@ -1,24 +1,23 @@
 import os
 
-#APIs
+# APIs
 TMDB_API_KEY = "04a87a053afac639272eefbb94a173e4"
 OMDB_API_URL = "http://www.omdbapi.com/"
 
 PROGRESS = 1000
-MAX_PROCESSES= 4
+MAX_PROCESSES = 4
 
-#server
+# server
 HOST = "127.0.0.1"
 PORT = "6885"
 DEBUG = True
 
-#metastore
+# metastore
 DEFAULT_DB = "librarian"
 DEFAULT_JOB_COLLECTION = "jobs"
 DEFAULT_META_COLLECTION = "entity_meta"
 
 ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
-
 WORKSPACE_PATH = os.path.join(ROOT_PATH, ".librarian")
 
 VIDEO_EXT = set([
