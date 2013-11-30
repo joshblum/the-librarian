@@ -6,11 +6,13 @@
     Responsible for adding data to the metastore
     if an entity is identified.
 """
-from librarian.constants import WORKSPACE_PATH, LOGGING, VIDEO_EXT
+from librarian.constants import WORKSPACE_PATH, LOGGING, VIDEO_EXT, JOB_ENQUEUED,
+JOB_STARTED, JOB_INPROGRESS, JOB_FAILED, JOB_COMPLETED,
 from librarian.utils import md5_for_file
 from librarian.identifiers.identifiers import HashIdentifier, TitleIdentifier
 from librarian.identifiers.movies.credits.identifier import MovieCreditIdentifier
 # from librarian.identifiers.movies.fingerprint.identifier import AudioFingerprintIdentifier
+from librarian.metastore import MetaCon
 
 import logging.config
 
@@ -33,7 +35,7 @@ class Handler(object):
         self.srcpath = srcpath
         self.job_id = job_id
         self.cleanup = cleanup
-
+        self.metastore = MetaCon()
         self.srcfile = self.set_srcfile()
         self.init_job()
 
@@ -42,31 +44,43 @@ class Handler(object):
             Initialize and insert the job into the metastore.
             Adds job_id, path, and contents hash.
             Used by subclasses after self.srcfile is set.
-            returns the job_id for the job
         """
-        # TODO
-        #self.create_workspace()
-        # if not self.srcpath in datastore:
-            #self.md5 = self.get_content_hash()
-            # self.path = self.create_workspace()
-            # insert job_id, md5, path into datastore
-        #return self.job_id
-        raise NotImplementedError
+        self.path = self.create_workspace()
+        self.md5 = self.get_content_hash()
+        self.metastore.update_job(
+            self.job_id, srcpath=self.srcpath, md5=self.md5,
+            progress=JOB_STARTED)
 
     def run(self):
         """
             Run the handler.
         """
-        metadata = self.get_entity_metadata()
-        self.finish_job(metadata)
+        self.update_progress(JOB_INPROGRESS)
 
-    def finish_job(self, metadata):
+        progress = JOB_COMPLETED
+        status = ""
+
+        try:
+            metadata = self.get_entity_metadata()
+        except Exception, e:
+            progress = JOB_FAILED
+            status = str(e)
+
+        if metadata is None:
+            status += "\nUnble to identify."
+
+        self.finish_job(metadata, progress, status)
+
+    def finish_job(self, metadata, progress, status):
         """
             Close the job out and add the metadata
             to the metastore
         """
-        #TODO
-        raise NotImplementedError
+        #TODO update dstpath
+        self.metastore.update_job(self.job_id, dstpath=""
+            progress=progress, status=status)
+        self.add_entity_metadata(metadata)
+        self.cleanup_workspace()
 
     def create_workspace(self):
         """
@@ -97,13 +111,14 @@ class Handler(object):
         # TODO
         raise NotImplementedError
 
-    def update_progress(self, status, msg=""):
+    def update_progress(self, progess, status=""):
         """
             Update the status of the current job
             Optionally add a status message.
         """
-        # TODO
-        raise NotImplementedError
+        self.metastore.update_job(self.job_id,
+                                  progress=progress, 
+                                  status=status)
 
     def get_content_hash(self):
         """
@@ -173,14 +188,18 @@ class MovieHandler(Handler):
         for identifier, args in identifiers:
             identifier = identifier(*args)
             metadata = identifier.identify()
-            logger.DEBUG("Running identifier %s, found metadata %s", % (identifier, metadata))
-            #TODO update progress?
+            status = "Running identifier %s, found metadata %s", % (identifier, metadata)
+            logger.DEBUG(status)
+            self.update_progress(JOB_INPROGRESS, status)
+            
             if metadata is not None:
                 return metadata
 
         return None
 
+
 class DummyHandler(Handler):
+
     """
         Default handler if an entity does not have a valid type
         Fails the job and adds it to the metastore
@@ -191,5 +210,3 @@ class DummyHandler(Handler):
 
     def get_entity_metadata(self):
         return None
-
-    

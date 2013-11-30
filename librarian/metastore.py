@@ -3,11 +3,12 @@
     Stores metadata with associated items and job progress
 """
 
-from pymongo import MongoClient
-from constants import DEFAULT_DB, DEFAULT_JOB_COLLECTION, DEFAULT_META_COLLECTION
+from pymongo import MongoClient, DESCENDING
+from constants import DEFAULT_DB, DEFAULT_JOB_COLLECTION, DEFAULT_META_COLLECTION, JOB_ENQUEUED
+from datetime import datetime
 
 
-class MongoCon():
+class MetaCon():
 
     def __init__(self, db_name=DEFAULT_DB,
                  job_collection=DEFAULT_JOB_COLLECTION,
@@ -16,6 +17,8 @@ class MongoCon():
         self.db = self.connect(db_name)
         self.job_collection = self.get_collection(job_collection)
         self.meta_collection = self.get_collection(meta_collection)
+        self.add_job_index()
+        self.add_meta_index()
 
     def connect(self, db_name):
         # must have mongo instance running
@@ -25,6 +28,69 @@ class MongoCon():
     def get_collection(self, name):
         return self.db[name]
 
-    def execute_query(self, query, collection):
-        collection = self._assign_collection(collection)
+    def add_job_index(self):
+        """
+            Index the job table on srcpath and dstpath.
+        """
+        self.job_collection.create_index([("srcpath", DESCENDING)])
+        self.job_collection.create_index([("dstpath", DESCENDING)])
+
+    def add_meta_index(self):
+        """
+            Index the meta table on ?
+        """
+        # TODO
+        pass
+
+    def add_job(self, job_doc):
+        """
+            Insert a new job into the metastore
+        """
+        self.job_collection.insert(job_doc)
+
+    def update_job(self, job_id, **kwargs):
+        """
+            Update a new job into the metastore
+        """
+        # valid kwargs
+        fields = self.get_job_doc(None, None)
+        for k in kwargs:
+            assert k in fields
+
+        self.job_collection.update({
+            {'job_id': job_id},
+            {'set': kwargs},
+        })
+
+    def find_job_by_id(self, job_id):
+        return self.find_one(self.job_collection, {
+                'job_id' : job_id,
+            })
+
+    def find_enqueued_jobs(self):
+        return self.find(self.job_collection, {
+            'progress' : JOB_ENQUEUED
+            })
+
+    def find_one(self, collection, query):
+        return collection.find_one(query)
+
+    def find(self, collection, query):
         return collection.find(query)
+
+    def get_job_doc(job_id, entity_type, srcpath, destpath=None,
+                    md5=None, progress=JOB_ENQUEUED,
+                    status="", timestamp=datetime.now()):
+        """
+            Util for creating a job type document.
+        """
+        return {
+            'job_id': job_id,
+            'entity_type': entity_type,
+            'srcpath': srcpath,
+            'dstpath': dstpath,
+            'md5': md5,
+            'progress': progress,
+            'status': status,
+            'timestamp': timestamp,
+        }

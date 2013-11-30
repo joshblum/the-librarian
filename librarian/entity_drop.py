@@ -6,8 +6,8 @@
 """
 
 from handlers import handlers
-
-from constants import MAX_PROCESSES
+from metastore import MetaCon
+from constants import MAX_PROCESSES, ENTITY_MOVIE
 
 from multiprocessing import Process, Queue
 from threading import Thread
@@ -15,32 +15,34 @@ from threading import Thread
 SLEEP = 5
 
 ENTITY_MAP = {
-    'movie': handlers.MovieHandler,
+    MOVIE_TYPE: handlers.MovieHandler,
 }
 
 
 def process_entity():
     while True:
-        srcpath, job_id, entity_type = q.get()
+        job = q.get()
         handler = ENTITY_MAP.get(
-            entity_type, handlers.DummyHandler)(srcpath, job_id)
+            job['entity_type'], handlers.DummyHandler)(job['srcpath'], job['job_id'])
         handler.run()
         q.task_done()
 
 
 def entity_queue():
-
+    metacon = MetaCon()
     q = Queue()
     for _ in xrange(MAX_PROCESSES):
         p = Process(target=process_entity, args=(q,))
         p.start()
 
-    # while True:
-        # get item from metastore
-        # q.put((srcpath, entity_type))
-        # time.sleep(SLEEP)
-
-    q.join()       # block until all tasks are done
+    while True:
+        jobs = metacon.get_enqueued_jobs()
+        for job in jobs:
+            q.put(job)
+        time.sleep(SLEEP)
+    
+    # # block until all tasks are done
+    # q.join()       
 
 if __name__ == "__main__":
     t = Thread(target=entity_queue)

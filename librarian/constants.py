@@ -17,6 +17,16 @@ DEFAULT_DB = "librarian"
 DEFAULT_JOB_COLLECTION = "jobs"
 DEFAULT_META_COLLECTION = "entity_meta"
 
+#job progress tracking
+JOB_ENQUEUED = "enqueued"
+JOB_STARTED = "started"
+JOB_INPROGRESS = "in-progress"
+JOB_FAILED = "failed"
+JOB_COMPLETED = "completed"
+
+#ENTITY_TYPES
+ENTITY_MOVIE = "movie"
+
 ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
 WORKSPACE_PATH = os.path.join(ROOT_PATH, ".librarian")
 
