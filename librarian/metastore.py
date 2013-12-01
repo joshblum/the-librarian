@@ -53,7 +53,7 @@ class MetaCon():
             Update a new job into the metastore
         """
         # valid kwargs
-        fields = self.get_job_doc(None, None)
+        fields = self.get_job_doc(None, None, None)
         for k in kwargs:
             assert k in fields
 
@@ -78,7 +78,7 @@ class MetaCon():
     def find(self, collection, query):
         return collection.find(query)
 
-    def get_job_doc(job_id, entity_type, srcpath, destpath=None,
+    def get_job_doc(self, job_id, entity_type, srcpath, dstpath=None,
                     md5=None, progress=JOB_ENQUEUED,
                     status="", timestamp=datetime.now()):
         """
