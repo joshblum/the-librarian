@@ -112,3 +112,8 @@ class MetaCon():
 
         metadata['timestamp'] = datetime.now()
         self.meta_collection.insert(metadata)
+
+    def find_metadata_by_md5(self, md5):
+        return self.find(self.meta_collection, {
+            'md5': md5
+        })

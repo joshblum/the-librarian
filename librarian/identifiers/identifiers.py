@@ -5,6 +5,7 @@
 """
 from librarian.constants import WORKSPACE_PATH, OMDB_API_URL, LOGGING
 from librarian.utils import md5_for_file
+from librarian.metastore import MetaCon
 import logging.config
 import requests
 
@@ -17,6 +18,7 @@ class Identifier(object):
     def __init__(self, srcfile, path):
         self.srcfile = srcfile
         self.path = path
+        self.metacon = MetaCon()
 
     def identify(self):
         """
@@ -121,13 +123,11 @@ class HashIdentifier(Identifier):
 
     def get_titles(self):
         logger.debug("MD5 hash %s for %s" % (self.md5, self.srcfile))
-        # TODO query metastore for match for hash
-        return self.md5
+        metadata = self.metastore.find_metadata_by_md5(self.md5)
+        return [item['title'] for item in metadata]
 
     def get_title_metadata(self, titles):
-        # TODO, call metastore for any matches found
-        raise NotImplementedError
-
+        return self.metastore.find_metadata_by_md5(self.md5)
 
 class TitleIdentifier(Identifier):
 
