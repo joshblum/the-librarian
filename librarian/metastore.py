@@ -59,14 +59,18 @@ class MetaCon():
         for k in kwargs:
             assert k in fields
 
-        md5 = 'md5'
-        if md5 in kwargs:
-            kwargs[md5] = bson.Binary(kwargs[md5])
+        kwargs = self._clean_md5(kwargs)
 
         self.job_collection.update(
             {'job_id': job_id},
             {'$set': kwargs},
         )
+
+    def _clean_md5(self, kwargs):
+        md5 = 'md5'
+        if md5 in kwargs:
+            kwargs[md5] = bson.Binary(kwargs[md5])
+        return kwargs
 
     def find_job_by_id(self, job_id):
         return self.find_one(self.job_collection, {
@@ -113,10 +117,12 @@ class MetaCon():
             'path',
             'md5',
         ]
-        for key in required_keys:
-            assert key in metadata
+        for data in metadata:
+            for key in required_keys:
+                assert key in data
+            data['timestamp'] = datetime.now()
+            data = self._clean_md5(data)
 
-        metadata['timestamp'] = datetime.now()
         self.meta_collection.insert(metadata)
 
     def find_metadata_by_md5(self, md5):

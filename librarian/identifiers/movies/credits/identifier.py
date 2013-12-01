@@ -20,8 +20,10 @@ class MovieCreditIdentifier(MovieIdentifier):
 
     def __init__(self, srcfile, path):
         super(MovieIdentifier, self).__init__(srcfile, path)
+        
         self.credits_path = "%s/credits" % self.path
-        os.mkdir(self.credits_path)
+        if not os.path.exists(self.credits_path):
+            os.mkdir(self.credits_path)
 
     def get_titles(self):
         #optimization: stream frames instead of batch

@@ -90,7 +90,7 @@ class Handler(object):
         logger.debug("Job %s updating metadata %s" % (
                 self.job_id, metadata))
         self.metastore.update_job(self.job_id, dstpath="",
-                                  progress=progress, status=status)
+                    progress=progress, status=status)
         
         logger.debug("Adding %s metadata" % metadata)
         self.add_entity_metadata(metadata)
@@ -125,12 +125,14 @@ class Handler(object):
             Add the metadata to the datastore
         """
         if metadata is not None:
-            metadata.update({
-                'entity_type': self.entity_type,
-                'job_id': self.job_id,
-                'path': self.srcfile,
-                'md5': self.md5,
-            })
+            for data in metadata:
+                data.update({
+                    'entity_type': self.entity_type,
+                    'job_id': self.job_id,
+                    'path': self.srcfile,
+                    'md5': self.md5,
+                })
+            logger.debug("Adding metadata %s" % metadata)
             self.metastore.add_entity_metadata(metadata)
 
     def update_progress(self, progress, status=""):

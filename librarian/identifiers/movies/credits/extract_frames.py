@@ -51,7 +51,7 @@ def gen_frames(input_name, frame_name, framerate=FRAMERATE):
         generate still frames for the given video with the 
         specified frame_name every 1/framerate seconds
     """
-    cmd = "ffmpeg -i %(input_name)s -r %(framerate)s -s vga -f image2 %(frame_name)s" % {
+    cmd = "ffmpeg -i %(input_name)s -r %(framerate)s -f image2 %(frame_name)s" % {
         'input_name': input_name,
         'framerate': framerate,
         'frame_name': frame_name,

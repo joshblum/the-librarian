@@ -54,37 +54,37 @@ class Identifier(object):
 
 
 class MovieIdentifier(Identifier):
-    metadata_keys = set([
-        'actors',
-        'box_office',
-        'dvd',
-        'director',
-        'genre',
-        'plot',
-        'poster',
-        'production',
-        'rated',
-        'released',
-        'runtime',
-        'title',
-        'type',
-        'website',
-        'writer',
-        'year',
-        'imdb_id',
-        'imdb_rating',
-        'imdb_votes',
-        'tomato_consensus',
-        'tomato_fresh',
-        'tomato_image',
-        'tomato_meter',
-        'tomato_rating',
-        'tomato_reviews',
-        'tomato_rotten',
-        'tomato_user_meter',
-        'tomato_user_rating',
-        'tomato_user_reviews',
-    ])
+    metadata_map = {
+        'Actors': 'actors',
+        'BoxOffice': 'box_office',
+        'DVD': 'dvd',
+        'Director': 'director',
+        'Genre': 'genre',
+        'Plot': 'plot',
+        'Poster': 'poster',
+        'Production': 'production',
+        'Rated': 'rated',
+        'Released': 'released',
+        'Runtime': 'runtime',
+        'Title': 'title',
+        'Type': 'type',
+        'Website': 'website',
+        'Writer': 'writer',
+        'Year': 'year',
+        'imdbID': 'imdb_id',
+        'imdbRating': 'imdb_rating',
+        'imdbVotes': 'imdb_votes',
+        'tomatoConsensus': 'tomato_consensus',
+        'tomatoFresh': 'tomato_fresh',
+        'tomatoImage': 'tomato_image',
+        'tomatoMeter': 'tomato_meter',
+        'tomatoRating': 'tomato_rating',
+        'tomatoReviews': 'tomato_reviews',
+        'tomatoRotten': 'tomato_rotten',
+        'tomatoUserMeter': 'tomato_user_meter',
+        'tomatoUserRating': 'tomato_user_rating',
+        'tomatoUserReviews': 'tomato_user_reviews',
+    }
 
     def get_title_metadata(self, titles):
         """
@@ -107,10 +107,10 @@ class MovieIdentifier(Identifier):
             change the keys of the metadata dictionary to 
             the format we want
         """
-        clean = {}
-        for key in self.metadata_keys:
-            clean[key] = metadata[key]
-        return clean
+        clean_meta = {}
+        for key, clean_key in self.metadata_map.iteritems():
+            clean_meta[clean_key] = metadata[key]
+        return clean_meta
 
 
 class HashIdentifier(Identifier):
@@ -128,6 +128,7 @@ class HashIdentifier(Identifier):
 
     def get_title_metadata(self, titles):
         return list(self.metastore.find_metadata_by_md5(self.md5))
+
 
 class TitleIdentifier(Identifier):
 
