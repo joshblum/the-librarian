@@ -18,7 +18,7 @@ class Identifier(object):
     def __init__(self, srcfile, path):
         self.srcfile = srcfile
         self.path = path
-        self.metacon = MetaCon()
+        self.metastore = MetaCon()
 
     def identify(self):
         """
@@ -122,12 +122,12 @@ class HashIdentifier(Identifier):
         self.md5 = md5
 
     def get_titles(self):
-        logger.debug("MD5 hash %s for %s" % (self.md5, self.srcfile))
+        logger.debug("Getting titles for %s" % self.srcfile)
         metadata = self.metastore.find_metadata_by_md5(self.md5)
         return [item['title'] for item in metadata]
 
     def get_title_metadata(self, titles):
-        return self.metastore.find_metadata_by_md5(self.md5)
+        return list(self.metastore.find_metadata_by_md5(self.md5))
 
 class TitleIdentifier(Identifier):
 

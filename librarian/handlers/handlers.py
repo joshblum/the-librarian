@@ -69,11 +69,10 @@ class Handler(object):
             logger.debug("Job %s Found metadata %s" % (
                 self.job_id, metadata))
         except Exception, e:
-            e = str(e)
             
             logger.debug("Job failed %s, %s" % (self.job_id, e))
             progress = JOB_FAILED
-            status = e
+            status = str(e)
             
             metadata = None
 
@@ -212,11 +211,12 @@ class MovieHandler(Handler):
                        #(AudioFingerprintIdentifier default_args),
                        ]
         for identifier, args in identifiers:
-            status = "Running identifier %s, found metadata %s" % (
-                identifier, metadata)
-            logger.DEBUG(status)
+            logger.debug("Running identifier %s with args %s" % (identifier, args))
             identifier = identifier(*args)
             metadata = identifier.identify()
+            status = "Ran identifier %s, found metadata %s" % (identifier, metadata)
+            
+            logger.debug(status)
             self.update_progress(JOB_INPROGRESS, status)
 
             if metadata is not None:

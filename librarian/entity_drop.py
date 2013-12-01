@@ -33,7 +33,6 @@ def process_entity(q):
             job['entity_type'], handlers.DummyHandler)(
                 job['job_id'], job['srcpath'], job['entity_type'])
         handler.run()
-        q.task_done()
 
 
 def entity_queue():
