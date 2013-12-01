@@ -43,6 +43,7 @@ class ActorDB(object):
                 WHERE f_name='%(f_name)s' AND l_name='%(l_name)s'""" % values
         return self._process_query(query)
 
+
 def parse_name(name):
     """
         returns a tuple of first name last name
@@ -52,6 +53,7 @@ def parse_name(name):
     if not valid_name_size(name):
         return "", ""
     return name[0], " ".join(name[1:])
+
 
 def valid_name_size(split_name):
     return between_values(split_name, MIN_NAME_L, MAX_NAME_L, inclusive=True)

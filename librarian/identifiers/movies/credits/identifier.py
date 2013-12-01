@@ -24,7 +24,7 @@ class MovieCreditIdentifier(MovieIdentifier):
         os.mkdir(self.credits_path)
 
     def get_titles(self):
-
+        #optimization: stream frames instead of batch
         extract_frames(self.srcfile, self.path, self.credits_path)
         logger.debug("Retrieving credit tokens.")
 

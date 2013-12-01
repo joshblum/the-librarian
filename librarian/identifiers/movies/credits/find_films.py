@@ -14,22 +14,21 @@ MIN_INTERSECTION = 2
 MIN_FUZZ_SCORE = 85
 
 tmdb.configure(TMDB_API_KEY)
-db = ActorDB()
-
 
 def find_films(tokens):
-    direct_match = get_film_intersection(tokens, _direct_query_match)
+    db = ActorDB()
+    direct_match = get_film_intersection(tokens, _direct_query_match, db)
     if len(direct_match) and len(direct_match) <= MIN_INTERSECTION:
         return direct_match
 
-    normalized_match = get_film_intersection(tokens, _normalize_text_match)
+    normalized_match = get_film_intersection(tokens, _normalize_text_match, db)
     return direct_match.intersection(normalized_match)
 
 
-def get_film_intersection(tokens, match_func):
+def get_film_intersection(tokens, match_func, db):
     films = set([])
     for name_token in tokens:
-        matches = match_func(name_token)  # [(actor names, score)]
+        matches = match_func(db, name_token)  # [(actor names, score)]
         #[[film_set1, filmset_2, ...], [...]]
         potential_actors = map(get_films, matches)
         if not len(potential_actors):
@@ -39,18 +38,18 @@ def get_film_intersection(tokens, match_func):
         films = reduce(merge_sets, potential_actors)
         if len(films) and len(min(films)) <= MIN_INTERSECTION:
             break
-    
+
     if not len(films):
         return films
-    
+
     return min(films)
 
 
-def _direct_query_match(name_token):
+def _direct_query_match(db, name_token):
     return db.query_name(name_token)
 
 
-def _normalize_text_match(name_token):
+def _normalize_text_match(db, name_token):
     """
         Perform fuzzing matching to try and match name tokens
     """
@@ -64,7 +63,7 @@ def _normalize_text_match(name_token):
     return map(lambda x: x[0], filtered_matches)
 
 
-def get_films(actor_name):    
+def get_films(actor_name):
     people = tmdb.People(actor_name)
     return [set([movie.get_original_title() for movie in person.cast()])
             for person in people]
