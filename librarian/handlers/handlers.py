@@ -6,8 +6,7 @@
     Responsible for adding data to the metastore
     if an entity is identified.
 """
-from librarian.constants import WORKSPACE_PATH, LOGGING, VIDEO_EXT, JOB_ENQUEUED,
-JOB_STARTED, JOB_INPROGRESS, JOB_FAILED, JOB_COMPLETED,
+from librarian.constants import WORKSPACE_PATH, LOGGING, VIDEO_EXT, JOB_ENQUEUED, JOB_STARTED, JOB_INPROGRESS, JOB_FAILED, JOB_COMPLETED
 from librarian.utils import md5_for_file
 from librarian.identifiers.identifiers import HashIdentifier, TitleIdentifier
 from librarian.identifiers.movies.credits.identifier import MovieCreditIdentifier
@@ -27,13 +26,15 @@ logger = logging.getLogger(__name__)
 
 class Handler(object):
 
-    def __init__(self, srcpath, job_id, cleanup=True):
+    def __init__(self, srcpath, job_id,
+                 entity_type, cleanup=True):
         """
             Each subclass must call init_job in their __init__
             method and return the job_id that is set
         """
         self.srcpath = srcpath
         self.job_id = job_id
+        self.entity_type = entity_type
         self.cleanup = cleanup
         self.metastore = MetaCon()
         self.srcfile = self.set_srcfile()
@@ -76,9 +77,9 @@ class Handler(object):
             Close the job out and add the metadata
             to the metastore
         """
-        #TODO update dstpath
-        self.metastore.update_job(self.job_id, dstpath=""
-            progress=progress, status=status)
+        # TODO update dstpath
+        self.metastore.update_job(self.job_id, dstpath="",
+                                  progress=progress, status=status)
         self.add_entity_metadata(metadata)
         self.cleanup_workspace()
 
@@ -91,7 +92,7 @@ class Handler(object):
             os.mkdir(WORKSPACE_PATH)
 
         path = os.path.join(WORKSPACE_PATH, self.job_id)
-        if not os.path.exists(path)
+        if not os.path.exists(path):
             os.mkdir(path)
 
         return path
@@ -108,8 +109,14 @@ class Handler(object):
         """
             Add the metadata to the datastore
         """
-        # TODO
-        raise NotImplementedError
+        if metadata is not None:
+            metadata.update({
+                'entity_type': self.entity_type,
+                'job_id': self.job_id,
+                'path': self.srcfile,
+                'md5': self.md5,
+            })
+            self.metastore.add_entity_metadata(metadata)
 
     def update_progress(self, progess, status=""):
         """
@@ -117,7 +124,7 @@ class Handler(object):
             Optionally add a status message.
         """
         self.metastore.update_job(self.job_id,
-                                  progress=progress, 
+                                  progress=progress,
                                   status=status)
 
     def get_content_hash(self):
@@ -188,10 +195,10 @@ class MovieHandler(Handler):
         for identifier, args in identifiers:
             identifier = identifier(*args)
             metadata = identifier.identify()
-            status = "Running identifier %s, found metadata %s", % (identifier, metadata)
+            status = "Running identifier %s, found metadata %s" % (identifier, metadata)
             logger.DEBUG(status)
             self.update_progress(JOB_INPROGRESS, status)
-            
+
             if metadata is not None:
                 return metadata
 

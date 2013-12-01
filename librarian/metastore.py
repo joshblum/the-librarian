@@ -64,13 +64,13 @@ class MetaCon():
 
     def find_job_by_id(self, job_id):
         return self.find_one(self.job_collection, {
-                'job_id' : job_id,
-            })
+            'job_id': job_id,
+        })
 
     def find_enqueued_jobs(self):
         return self.find(self.job_collection, {
-            'progress' : JOB_ENQUEUED
-            })
+            'progress': JOB_ENQUEUED
+        })
 
     def find_one(self, collection, query):
         return collection.find_one(query)
@@ -94,3 +94,21 @@ class MetaCon():
             'status': status,
             'timestamp': timestamp,
         }
+
+    def add_entity_metadata(self, metadata):
+        """
+            metadata object for various entity types,
+            required keys listed below. If these keys are not
+            present assertion error is thrown.
+        """
+        required_keys = [
+            'job_id',
+            'entity_type',
+            'path',
+            'md5',
+        ]
+        for key in required_keys:
+            assert key in metadata
+
+        metadata['timestamp'] = datetime.now()
+        self.meta_collection.insert(metadata)

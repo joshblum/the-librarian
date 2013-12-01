@@ -50,7 +50,39 @@ class Identifier(object):
         """
         raise NotImplementedError
 
+
 class MovieIdentifier(Identifier):
+    metadata_keys = set([
+        'actors',
+        'box_office',
+        'dvd',
+        'director',
+        'genre',
+        'plot',
+        'poster',
+        'production',
+        'rated',
+        'released',
+        'runtime',
+        'title',
+        'type',
+        'website',
+        'writer',
+        'year',
+        'imdb_id',
+        'imdb_rating',
+        'imdb_votes',
+        'tomato_consensus',
+        'tomato_fresh',
+        'tomato_image',
+        'tomato_meter',
+        'tomato_rating',
+        'tomato_reviews',
+        'tomato_rotten',
+        'tomato_user_meter',
+        'tomato_user_rating',
+        'tomato_user_reviews',
+    ])
 
     def get_title_metadata(self, titles):
         """
@@ -61,11 +93,22 @@ class MovieIdentifier(Identifier):
         for title in titles:
             r = requests.get(OMDB_API_URL, params={
                 't': title,
+                'tomatoes': True,
             }).json()
 
             if r['Response']:
-                res.append(r)
+                res.append(self.clean_metadata(r))
         return res
+
+    def clean_metadata(self, metadata):
+        """
+            change the keys of the metadata dictionary to 
+            the format we want
+        """
+        clean = {}
+        for key in self.metadata_keys:
+            clean[key] = metadata[key]
+        return clean
 
 
 class HashIdentifier(Identifier):
@@ -76,15 +119,15 @@ class HashIdentifier(Identifier):
             md5 = md5_for_file(self.srcfile)
         self.md5 = md5
 
-
     def get_titles(self):
         logger.debug("MD5 hash %s for %s" % (self.md5, self.srcfile))
-        #TODO query metastore for match for hash
+        # TODO query metastore for match for hash
         return self.md5
 
     def get_title_metadata(self, titles):
-        #TODO, call metastore for any matches found
+        # TODO, call metastore for any matches found
         raise NotImplementedError
+
 
 class TitleIdentifier(Identifier):
 
@@ -92,5 +135,5 @@ class TitleIdentifier(Identifier):
         raise NotImplementedError
 
     def get_title_metadata(self, titles):
-        #TODO, call metastore for anymatches found
+        # TODO, call metastore for anymatches found
         raise NotImplementedError
