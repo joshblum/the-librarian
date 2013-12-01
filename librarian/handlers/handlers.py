@@ -26,21 +26,21 @@ logger = logging.getLogger(__name__)
 
 class Handler(object):
 
-    def __init__(self, srcpath, job_id,
+    def __init__(self, job_id, srcpath,
                  entity_type, cleanup=True):
         """
             Each subclass must call init_job in their __init__
             method and return the job_id that is set
         """
-        self.srcpath = srcpath
         self.job_id = job_id
+        self.srcpath = srcpath
         self.entity_type = entity_type
         self.cleanup = cleanup
         self.metastore = MetaCon()
         self.srcfile = self.set_srcfile()
         self.init_job()
 
-    def init_job(self, srcfile):
+    def init_job(self):
         """
             Initialize and insert the job into the metastore.
             Adds job_id, path, and contents hash.
@@ -48,6 +48,9 @@ class Handler(object):
         """
         self.path = self.create_workspace()
         self.md5 = self.get_content_hash()
+
+        logger.debug("Updating job %s" % self.job_id)
+
         self.metastore.update_job(
             self.job_id, srcpath=self.srcpath, md5=self.md5,
             progress=JOB_STARTED)
@@ -63,9 +66,16 @@ class Handler(object):
 
         try:
             metadata = self.get_entity_metadata()
+            logger.debug("Job %s Found metadata %s" % (
+                self.job_id, metadata))
         except Exception, e:
+            e = str(e)
+            
+            logger.debug("Job failed %s, %s" % (self.job_id, e))
             progress = JOB_FAILED
-            status = str(e)
+            status = e
+            
+            metadata = None
 
         if metadata is None:
             status += "\nUnble to identify."
@@ -78,8 +88,12 @@ class Handler(object):
             to the metastore
         """
         # TODO update dstpath
+        logger.debug("Job %s updating metadata %s" % (
+                self.job_id, metadata))
         self.metastore.update_job(self.job_id, dstpath="",
                                   progress=progress, status=status)
+        
+        logger.debug("Adding %s metadata" % metadata)
         self.add_entity_metadata(metadata)
         self.cleanup_workspace()
 
@@ -94,6 +108,8 @@ class Handler(object):
         path = os.path.join(WORKSPACE_PATH, self.job_id)
         if not os.path.exists(path):
             os.mkdir(path)
+
+        logger.debug("Created workspace %s" % path)
 
         return path
 
@@ -118,11 +134,13 @@ class Handler(object):
             })
             self.metastore.add_entity_metadata(metadata)
 
-    def update_progress(self, progess, status=""):
+    def update_progress(self, progress, status=""):
         """
             Update the status of the current job
             Optionally add a status message.
         """
+        logger.debug("Updating job %s to progress %s" % (
+            self.job_id, progress))
         self.metastore.update_job(self.job_id,
                                   progress=progress,
                                   status=status)
@@ -152,8 +170,9 @@ class Handler(object):
 
 class MovieHandler(Handler):
 
-    def __init__(self, srcpath, cleanup=True):
-        super(Handler, self).__init__(srcpath, cleanup)
+    def __init__(self, job_id, srcpath, entity_type, cleanup=True):
+        super(MovieHandler, self).__init__(
+            job_id, srcpath, entity_type, cleanup)
 
     def set_srcfile(self):
         """
@@ -193,10 +212,11 @@ class MovieHandler(Handler):
                        #(AudioFingerprintIdentifier default_args),
                        ]
         for identifier, args in identifiers:
+            status = "Running identifier %s, found metadata %s" % (
+                identifier, metadata)
+            logger.DEBUG(status)
             identifier = identifier(*args)
             metadata = identifier.identify()
-            status = "Running identifier %s, found metadata %s" % (identifier, metadata)
-            logger.DEBUG(status)
             self.update_progress(JOB_INPROGRESS, status)
 
             if metadata is not None:

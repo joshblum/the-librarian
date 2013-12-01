@@ -116,7 +116,7 @@ class MovieIdentifier(Identifier):
 class HashIdentifier(Identifier):
 
     def __init__(self, srcfile, path, md5=None):
-        super(MovieIdentifier, self).__init__(srcfile, path)
+        super(HashIdentifier, self).__init__(srcfile, path)
         if md5 is None:
             md5 = md5_for_file(self.srcfile)
         self.md5 = md5

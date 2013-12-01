@@ -7,6 +7,8 @@ from pymongo import MongoClient, DESCENDING
 from constants import DEFAULT_DB, DEFAULT_JOB_COLLECTION, DEFAULT_META_COLLECTION, JOB_ENQUEUED
 from datetime import datetime
 
+import bson
+
 
 class MetaCon():
 
@@ -57,10 +59,14 @@ class MetaCon():
         for k in kwargs:
             assert k in fields
 
-        self.job_collection.update({
+        md5 = 'md5'
+        if md5 in kwargs:
+            kwargs[md5] = bson.Binary(kwargs[md5])
+
+        self.job_collection.update(
             {'job_id': job_id},
-            {'set': kwargs},
-        })
+            {'$set': kwargs},
+        )
 
     def find_job_by_id(self, job_id):
         return self.find_one(self.job_collection, {
@@ -115,5 +121,5 @@ class MetaCon():
 
     def find_metadata_by_md5(self, md5):
         return self.find(self.meta_collection, {
-            'md5': md5
+            'md5': bson.Binary(md5),
         })
