@@ -25,7 +25,7 @@ class Identifier(object):
             Generic method to identify files.
             Calls the get_title_meta function specified by each 
             base class to gather metadata
-            Returns a list of JSON encoded objects for results
+            Returns a dictionary of JSON encoded objects for results
         """
 
         titles = self.get_titles()
@@ -124,10 +124,10 @@ class HashIdentifier(Identifier):
     def get_titles(self):
         logger.debug("Getting titles for %s" % self.srcfile)
         metadata = self.metastore.find_metadata_by_md5(self.md5)
-        return [item['title'] for item in metadata]
+        return [item['data']['title'] for item in metadata]
 
     def get_title_metadata(self, titles):
-        return list(self.metastore.find_metadata_by_md5(self.md5))
+        return [metadata['data'] for metadata in self.metastore.find_metadata_by_md5(self.md5)]
 
 
 class TitleIdentifier(Identifier):

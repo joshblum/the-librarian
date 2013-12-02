@@ -37,7 +37,7 @@ def cut_vid(inname, outname, start_time, end_time):
         Cut the video at the specified times copying 
         the video from the inname to outname
     """
-    cmd = "ffmpeg -ss %(start_time)s -i %(inname)s -t %(end_time)s -c:v copy -c:a copy %(outname)s" % {
+    cmd = "ffmpeg -y -ss %(start_time)s -i %(inname)s -t %(end_time)s -c:v copy -c:a copy %(outname)s" % {
         'inname': inname,
         'outname': outname,
         'start_time': start_time,
@@ -51,7 +51,7 @@ def gen_frames(input_name, frame_name, framerate=FRAMERATE):
         generate still frames for the given video with the 
         specified frame_name every 1/framerate seconds
     """
-    cmd = "ffmpeg -i %(input_name)s -r %(framerate)s -f image2 %(frame_name)s" % {
+    cmd = "ffmpeg -y -i %(input_name)s -r %(framerate)s -f image2 %(frame_name)s" % {
         'input_name': input_name,
         'framerate': framerate,
         'frame_name': frame_name,

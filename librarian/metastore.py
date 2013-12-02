@@ -117,13 +117,23 @@ class MetaCon():
             'path',
             'md5',
         ]
-        for data in metadata:
-            for key in required_keys:
-                assert key in data
-            data['timestamp'] = datetime.now()
-            data = self._clean_md5(data)
+        _id = '_id'
 
-        self.meta_collection.insert(metadata)
+        for key in required_keys:
+            assert key in metadata
+            
+        metadata['timestamp'] = datetime.now()
+        metadata = self._clean_md5(metadata)
+
+        if _id in metadata:        
+            self.meta_collection.update(
+                {_id: data[_id], },
+                {'$set': {
+                    'data' : data
+                }, }
+            )
+        else:
+            self.meta_collection.insert(metadata)
 
     def find_metadata_by_md5(self, md5):
         return self.find(self.meta_collection, {

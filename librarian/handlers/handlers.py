@@ -125,13 +125,13 @@ class Handler(object):
             Add the metadata to the datastore
         """
         if metadata is not None:
-            for data in metadata:
-                data.update({
-                    'entity_type': self.entity_type,
-                    'job_id': self.job_id,
-                    'path': self.srcfile,
-                    'md5': self.md5,
-                })
+            metadata = {
+                'entity_type': self.entity_type,
+                'job_id': self.job_id,
+                'path': self.srcfile,
+                'md5': self.md5,
+                'data' : metadata
+            }
             logger.debug("Adding metadata %s" % metadata)
             self.metastore.add_entity_metadata(metadata)
 
