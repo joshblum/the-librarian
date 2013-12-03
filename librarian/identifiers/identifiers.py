@@ -130,13 +130,3 @@ class HashIdentifier(Identifier):
 
     def get_title_metadata(self, titles):
         return self.metastore.find_metadata_by_md5(self.md5)
-
-
-class TitleIdentifier(Identifier):
-
-    def get_titles(self):
-        raise NotImplementedError
-
-    def get_title_metadata(self, titles):
-        # TODO, call metastore for anymatches found
-        raise NotImplementedError

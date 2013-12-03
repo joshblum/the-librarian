@@ -140,3 +140,13 @@ class MetaCon():
         return self.find_one(self.meta_collection, {
             'md5': bson.Binary(md5),
         })
+
+    def find_metadata_by_titles(self, titles):
+        return self.find(self.meta_collection, {
+            'data': {
+                '$elemMatch': {
+                        'title': {'$in': titles},
+                    },
+                },
+            }
+        )
