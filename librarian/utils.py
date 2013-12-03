@@ -53,6 +53,8 @@ def csv_to_sql(in_file, table_name, cols):
 
 def download_file(url):
     local_filename = url.split('/')[-1]
+    local_filename = os.path.join(
+        os.path.dirname(__file__), local_filename)
     r = requests.get(url, stream=True)
     with open(local_filename, 'wb') as f:
         for chunk in r.iter_content(chunk_size=1024):
