@@ -2,8 +2,8 @@
     Scrape the most popular actors from the TMDB api and output to a file
 """
 from tmdb import tmdb
-from utils import parse_name
-from constants import TMDB_API_KEY, PROGRESS
+from librarian.identifiers.movies.credits.utils import parse_name
+from librarian.constants import TMDB_API_KEY, PROGRESS
 from populate_actors import TMDB_FILE_NAME
 
 import csv

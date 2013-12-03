@@ -2,8 +2,10 @@
     Process actor names from the OMDB database file
 """
 
-from constants import ACTORS_CSV_HEADER, PROGRESS
-from utils import parse_name, download_file, unzip_file
+from librarian.constants import PROGRESS
+from librarian.utils import download_file, unzip_file
+from librarian.identifiers.movies.credits.constants import ACTORS_CSV_HEADER
+from librarian.identifiers.movies.credits.utils import parse_name
 from populate_actors import OMDB_FILE_NAME
 
 import csv
@@ -19,7 +21,7 @@ def scrape_omdb(write_file, cleanup=True):
         Download the omdb database file and process the data
 
     """
-    local_file = download_file(REQ_URL))
+    local_file = download_file(REQ_URL)
     unzip_file(local_file)
     with open(OMDB_IN_FILE) as f_read, open(write_file, "w") as f_write:
         reader = csv.DictReader(f_read, delimiter="\t")
@@ -35,7 +37,7 @@ def scrape_omdb(write_file, cleanup=True):
     print "Found %d actors" % actor_count
 
     if cleanup:
-        map(os.remove. [local_file, 'tomatoes.txt', OMDB_IN_FILE])
+        map(os.remove, [local_file, 'tomatoes.txt', OMDB_IN_FILE])
 
 
 def _clean_row(line):
