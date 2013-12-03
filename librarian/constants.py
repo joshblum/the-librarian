@@ -9,7 +9,7 @@ MAX_PROCESSES = 4
 
 # server
 HOST = "127.0.0.1"
-PORT = "6885"
+PORT = 6885
 DEBUG = True
 
 # metastore
@@ -57,11 +57,6 @@ LOGGING = {
         '': {
             'handlers': ['file'],
             'level': 'DEBUG',
-            'propagate': True
-        },
-        '': {
-            'handlers': ['file'],
-            'level': 'INFO',
             'propagate': True
         },
     }

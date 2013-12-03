@@ -7,6 +7,8 @@ from pymongo import MongoClient, DESCENDING
 from constants import DEFAULT_DB, DEFAULT_JOB_COLLECTION, DEFAULT_META_COLLECTION, JOB_ENQUEUED
 from datetime import datetime
 
+import bson
+
 
 class MetaCon():
 
@@ -53,24 +55,32 @@ class MetaCon():
             Update a new job into the metastore
         """
         # valid kwargs
-        fields = self.get_job_doc(None, None)
+        fields = self.get_job_doc(None, None, None)
         for k in kwargs:
             assert k in fields
 
-        self.job_collection.update({
+        kwargs = self._clean_md5(kwargs)
+
+        self.job_collection.update(
             {'job_id': job_id},
-            {'set': kwargs},
-        })
+            {'$set': kwargs},
+        )
+
+    def _clean_md5(self, kwargs):
+        md5 = 'md5'
+        if md5 in kwargs:
+            kwargs[md5] = bson.Binary(kwargs[md5])
+        return kwargs
 
     def find_job_by_id(self, job_id):
         return self.find_one(self.job_collection, {
-                'job_id' : job_id,
-            })
+            'job_id': job_id,
+        })
 
     def find_enqueued_jobs(self):
         return self.find(self.job_collection, {
-            'progress' : JOB_ENQUEUED
-            })
+            'progress': JOB_ENQUEUED
+        })
 
     def find_one(self, collection, query):
         return collection.find_one(query)
@@ -78,9 +88,10 @@ class MetaCon():
     def find(self, collection, query):
         return collection.find(query)
 
-    def get_job_doc(job_id, entity_type, srcpath, destpath=None,
+    def get_job_doc(self, job_id, entity_type, srcpath, dstpath=None,
                     md5=None, progress=JOB_ENQUEUED,
-                    status="", timestamp=datetime.now()):
+                    status="", timestamp=datetime.now(),
+                    meta_id=None):
         """
             Util for creating a job type document.
         """
@@ -93,4 +104,49 @@ class MetaCon():
             'progress': progress,
             'status': status,
             'timestamp': timestamp,
+            'meta_id': meta_id,
         }
+
+    def add_entity_metadata(self, metadata):
+        """
+            metadata object for various entity types,
+            required keys listed below. If these keys are not
+            present assertion error is thrown.
+        """
+        required_keys = [
+            'entity_type',
+            'path',
+            'md5',
+        ]
+        _id = '_id'
+
+        for key in required_keys:
+            assert key in metadata
+
+        metadata['timestamp'] = datetime.now()
+        metadata = self._clean_md5(metadata)
+
+        if _id in metadata:
+            self.meta_collection.update(
+                {_id: metadata[_id], },
+                {'$set': {
+                    'data': metadata['data']
+                }, }
+            )
+        else:
+            self.meta_collection.insert(metadata)
+
+    def find_metadata_by_md5(self, md5):
+        return self.find_one(self.meta_collection, {
+            'md5': bson.Binary(md5),
+        })
+
+    def find_metadata_by_titles(self, titles):
+        return self.find(self.meta_collection, {
+            'data': {
+                '$elemMatch': {
+                        'title': {'$in': titles},
+                    },
+                },
+            }
+        )

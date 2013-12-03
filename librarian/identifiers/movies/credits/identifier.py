@@ -20,11 +20,13 @@ class MovieCreditIdentifier(MovieIdentifier):
 
     def __init__(self, srcfile, path):
         super(MovieIdentifier, self).__init__(srcfile, path)
+        
         self.credits_path = "%s/credits" % self.path
-        os.mkdir(self.credits_path)
+        if not os.path.exists(self.credits_path):
+            os.mkdir(self.credits_path)
 
     def get_titles(self):
-
+        #optimization: stream frames instead of batch
         extract_frames(self.srcfile, self.path, self.credits_path)
         logger.debug("Retrieving credit tokens.")
 
@@ -34,7 +36,6 @@ class MovieCreditIdentifier(MovieIdentifier):
         films = find_films(credit_tokens)
         logger.debug(films)
         return films
-
 
 if __name__ == "__main__":
     import sys
