@@ -69,11 +69,11 @@ class Handler(object):
             logger.debug("Job %s Found metadata %s" % (
                 self.job_id, metadata))
         except Exception, e:
-            
+
             logger.debug("Job failed %s, %s" % (self.job_id, e))
             progress = JOB_FAILED
             status = str(e)
-            
+
             metadata = None
 
         if metadata is None:
@@ -88,10 +88,17 @@ class Handler(object):
         """
         # TODO update dstpath
         logger.debug("Job %s updating metadata %s" % (
-                self.job_id, metadata))
-        self.metastore.update_job(self.job_id, dstpath="",
-                    progress=progress, status=status)
+            self.job_id, metadata))
         
+        meta_id = None
+
+        if metadata is not None and '_id' in metadata['data']:
+            meta_id = metadata['data']['_id'] 
+        
+        self.metastore.update_job(self.job_id, meta_id=meta_id,
+                                  dstpath="", progress=progress, 
+                                  status=status)
+
         logger.debug("Adding %s metadata" % metadata)
         self.add_entity_metadata(metadata)
         self.cleanup_workspace()
@@ -127,10 +134,9 @@ class Handler(object):
         if metadata is not None:
             metadata = {
                 'entity_type': self.entity_type,
-                'job_id': self.job_id,
                 'path': self.srcfile,
                 'md5': self.md5,
-                'data' : metadata
+                'data': metadata['data']
             }
             logger.debug("Adding metadata %s" % metadata)
             self.metastore.add_entity_metadata(metadata)
@@ -207,17 +213,19 @@ class MovieHandler(Handler):
         """
         default_args = (self.srcfile, self.path)
         identifiers = [(HashIdentifier, (self.srcfile, self.path, self.md5)),
+                       #(AudioFingerprintIdentifier default_args),
                        #(TitleIdentifier, (self.srcpath, self.path)),
                        #(TitleIdentifier, default_args),
                        (MovieCreditIdentifier, default_args),
-                       #(AudioFingerprintIdentifier default_args),
                        ]
         for identifier, args in identifiers:
-            logger.debug("Running identifier %s with args %s" % (identifier, args))
+            logger.debug("Running identifier %s with args %s" %
+                         (identifier, args))
             identifier = identifier(*args)
             metadata = identifier.identify()
-            status = "Ran identifier %s, found metadata %s" % (identifier, metadata)
-            
+            status = "Ran identifier %s, found metadata %s" % (
+                identifier, metadata)
+
             logger.debug(status)
             self.update_progress(JOB_INPROGRESS, status)
 

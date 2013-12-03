@@ -34,7 +34,9 @@ class Identifier(object):
         logger.debug("Metadata %s" % metadata)
         if not len(metadata):
             return None
-        return metadata
+        return {
+            'data': metadata,
+        }
 
     def get_titles(self):
         """
@@ -124,10 +126,10 @@ class HashIdentifier(Identifier):
     def get_titles(self):
         logger.debug("Getting titles for %s" % self.srcfile)
         metadata = self.metastore.find_metadata_by_md5(self.md5)
-        return [item['data']['title'] for item in metadata]
+        return [item['title'] for item in metadata['data']]
 
     def get_title_metadata(self, titles):
-        return [metadata['data'] for metadata in self.metastore.find_metadata_by_md5(self.md5)]
+        return self.metastore.find_metadata_by_md5(self.md5)
 
 
 class TitleIdentifier(Identifier):

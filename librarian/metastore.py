@@ -90,7 +90,8 @@ class MetaCon():
 
     def get_job_doc(self, job_id, entity_type, srcpath, dstpath=None,
                     md5=None, progress=JOB_ENQUEUED,
-                    status="", timestamp=datetime.now()):
+                    status="", timestamp=datetime.now(),
+                    meta_id=None):
         """
             Util for creating a job type document.
         """
@@ -103,6 +104,7 @@ class MetaCon():
             'progress': progress,
             'status': status,
             'timestamp': timestamp,
+            'meta_id': meta_id,
         }
 
     def add_entity_metadata(self, metadata):
@@ -112,7 +114,6 @@ class MetaCon():
             present assertion error is thrown.
         """
         required_keys = [
-            'job_id',
             'entity_type',
             'path',
             'md5',
@@ -121,21 +122,21 @@ class MetaCon():
 
         for key in required_keys:
             assert key in metadata
-            
+
         metadata['timestamp'] = datetime.now()
         metadata = self._clean_md5(metadata)
 
-        if _id in metadata:        
+        if _id in metadata:
             self.meta_collection.update(
-                {_id: data[_id], },
+                {_id: metadata[_id], },
                 {'$set': {
-                    'data' : data
+                    'data': metadata['data']
                 }, }
             )
         else:
             self.meta_collection.insert(metadata)
 
     def find_metadata_by_md5(self, md5):
-        return self.find(self.meta_collection, {
+        return self.find_one(self.meta_collection, {
             'md5': bson.Binary(md5),
         })
