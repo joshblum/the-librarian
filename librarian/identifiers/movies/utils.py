@@ -1,11 +1,11 @@
 from librarian.utils import csv_to_sql, between_values
 
-from constants import MIN_L, MAX_L, MAX_NAME_L, MIN_NAME_L, SQL_CONFIG
+from constants import MIN_L, MAX_L, MAX_NAME_L, MIN_NAME_L, ACTORS_SQL_CONFIG, FILMS_SQL_CONFIG
 
 
 class DBWrap(object):
 
-    def __init__(self, config=SQL_CONFIG):
+    def __init__(self, config):
         self.config = config
         self.con = csv_to_sql(
             config['csv_file'], config['table_name'], config['cols'])

@@ -5,6 +5,7 @@
 """
 
 from librarian.constants import TMDB_API_KEY
+from librarian.identifiers.movies.constants import ACTORS_SQL_CONFIG
 from utils import ActorDB
 
 from fuzzywuzzy import process
@@ -16,7 +17,7 @@ MIN_FUZZ_SCORE = 85
 tmdb.configure(TMDB_API_KEY)
 
 def find_films(tokens):
-    db = ActorDB()
+    db = ActorDB(ACTORS_SQL_CONFIG)
     direct_match = get_film_intersection(tokens, _direct_query_match, db)
     if len(direct_match) and len(direct_match) <= MIN_INTERSECTION:
         return direct_match
