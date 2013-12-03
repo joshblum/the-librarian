@@ -27,9 +27,9 @@ def scrape_omdb(write_file, cleanup=True):
         writer.writeheader()
         actor_count = 0
         for line in reader:
-            clean_rows = _clean_rows(line)
-            actor_count += len(clean_rows)
-            writer.writerows(clean_rows)
+            clean_row = _clean_row(line)
+            actor_count += len(clean_row)
+            writer.writerows(clean_row)
             if not actor_count % PROGRESS:
                 print "Found %d actors" % actor_count
     print "Found %d actors" % actor_count
@@ -38,7 +38,7 @@ def scrape_omdb(write_file, cleanup=True):
         map(os.remove. [local_file, 'tomatoes.txt', OMDB_IN_FILE])
 
 
-def _clean_rows(line):
+def _clean_row(line):
     """
         split a single row into a list of 
         dictionaries of first and last names for each actor
