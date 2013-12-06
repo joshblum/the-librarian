@@ -1,7 +1,13 @@
 from librarian.utils import csv_to_sql, between_values
 
-from constants import MIN_L, MAX_L, MAX_NAME_L, MIN_NAME_L, ACTORS_SQL_CONFIG, FILMS_SQL_CONFIG
+from librarian.identifiers.movies.constants import MIN_L, \
+    MAX_L, MAX_NAME_L, MIN_NAME_L, ACTORS_SQL_CONFIG, FILMS_SQL_CONFIG
 
+from fuzzywuzzy import process
+
+import re
+
+MIN_FUZZ_SCORE = 85
 
 class DBWrap(object):
 
@@ -10,6 +16,22 @@ class DBWrap(object):
         self.con = csv_to_sql(
             config['csv_file'], config['table_name'], config['cols'])
         self.cursor = self.con.cursor()
+
+    def fuzzy_match(self, token):
+        """
+            Perform fuzzing matching to try and match name tokens
+        """
+        choices = self.query_fuzzy(token)
+        matches = process.extractOne(token, choices)
+        if not isinstance(matches, list):
+            matches = [matches]
+
+        filtered_matches = filter(
+            lambda x: x is not None and x[1] > MIN_FUZZ_SCORE, matches)
+        return map(lambda x: x[0], filtered_matches)
+
+    def query_fuzzy(self, token):
+        raise NotImplementedError
 
     def _get_values(self, **kwargs):
         kwargs.update(self.config)
@@ -24,11 +46,14 @@ class DBWrap(object):
 
 class ActorDB(DBWrap):
 
+    def __init__(self, config=ACTORS_SQL_CONFIG):
+        super(FilmDB, self).__init__(config)
+
     def _get_name_token_values(self, name_token):
         f_name, l_name = parse_name(name_token)
         return self._get_values(f_name=f_name, l_name=l_name)
 
-    def query_close_name(self, name_token):
+    def query_fuzzy(self, name_token):
         """
             find the intersection of all first and 
             last names are within len_diff size of the given name
@@ -48,11 +73,24 @@ class ActorDB(DBWrap):
 
 class FilmDB(DBWrap):
 
+    def __init__(self, config=FILMS_SQL_CONFIG):
+        super(FilmDB, self).__init__(config)
+
     def query_title(self, title, year=""):
         values = self._get_values(title=title, year=year)
-        query = """SELECT title from %(table_name)s
-                WHERE title='%(title)s'""" % values
-        return self._process_query(query)
+        query = """SELECT title, year from %(table_name)s
+                WHERE title="%(title)s" """
+        if year:
+            query += "AND year='%(year)s'"
+        return self._process_query(query % values)
+
+    def query_fuzzy(self, title, year=""):
+        values = self._get_values(title=title, year=year)
+        query = """SELECT title, year FROM %(table_name)s 
+                WHERE ABS(LENGTH(title) - LENGTH("%(title)s")) <= %(len_diff)s""" % values
+        if year:
+            query += "AND year='%(year)s'"
+        return self._process_query(query % values)
 
 
 def parse_name(name):

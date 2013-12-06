@@ -16,6 +16,11 @@ MIN = 5
 FMT = "%H:%M:%S"
 
 
+def replace_all(text, stopwords, repl=""):
+    for word in stopwords:
+        text = text.replace(word, repl)
+    return text
+
 def flatten(l):
     return [item for sublist in l for item in sublist]
 
@@ -41,6 +46,7 @@ def csv_to_sql(in_file, table_name, cols):
 
     with open(in_file) as f_read:
         con = sqlite3.connect(":memory:")
+        con.text_factory = str
         cur = con.cursor()
         cur.execute(create_table_statement)
 

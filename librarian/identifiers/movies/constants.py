@@ -14,8 +14,9 @@ ACTORS_SQL_CONFIG = {
     'len_diff' : 0,
 }
 
-FILM_SQL_CONFIG = {
+FILMS_SQL_CONFIG = {
     'csv_file' : os.path.join(os.path.dirname(__file__), 'db/films.csv'),
     'table_name' : 'films',
     'cols' : FILMS_CSV_HEADER,
+    'len_diff' : 0,
 }

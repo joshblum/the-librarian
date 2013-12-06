@@ -61,9 +61,8 @@ def clean_film_row(line):
     """
         Return the film title and year
     """
-
     return [{
-        'title': line['Title'],
+        'title': line['Title'].lower(),
         'year': line['Year'],
     }]
 

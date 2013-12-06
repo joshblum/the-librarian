@@ -5,19 +5,16 @@
 """
 
 from librarian.constants import TMDB_API_KEY
-from librarian.identifiers.movies.constants import ACTORS_SQL_CONFIG
 from utils import ActorDB
 
-from fuzzywuzzy import process
 from tmdb import tmdb
 
 MIN_INTERSECTION = 2
-MIN_FUZZ_SCORE = 85
 
 tmdb.configure(TMDB_API_KEY)
 
 def find_films(tokens):
-    db = ActorDB(ACTORS_SQL_CONFIG)
+    db = ActorDB()
     direct_match = get_film_intersection(tokens, _direct_query_match, db)
     if len(direct_match) and len(direct_match) <= MIN_INTERSECTION:
         return direct_match
@@ -49,20 +46,8 @@ def get_film_intersection(tokens, match_func, db):
 def _direct_query_match(db, name_token):
     return db.query_name(name_token)
 
-
 def _normalize_text_match(db, name_token):
-    """
-        Perform fuzzing matching to try and match name tokens
-    """
-    choices = db.query_close_name(name_token)
-    matches = process.extractOne(name_token, choices)
-    if not isinstance(matches, list):
-        matches = [matches]
-
-    filtered_matches = filter(
-        lambda x: x is not None and x[1] > MIN_FUZZ_SCORE, matches)
-    return map(lambda x: x[0], filtered_matches)
-
+    return db.fuzzy_match(name_token)
 
 def get_films(actor_name):
     people = tmdb.People(actor_name)
