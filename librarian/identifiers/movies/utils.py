@@ -41,7 +41,7 @@ class DBWrap(object):
         return self.cursor.execute(query).fetchall()
 
     def _process_query(self, query):
-        return map(lambda x: " ".join(x), self._fetchall(query))
+        return self._fetchall(query)
 
 
 class ActorDB(DBWrap):
@@ -70,6 +70,9 @@ class ActorDB(DBWrap):
                 WHERE f_name='%(f_name)s' AND l_name='%(l_name)s'""" % values
         return self._process_query(query)
 
+    def _process_query(self, query):
+        return map(lambda x: " ".join(x), self._fetchall(query))
+
 
 class FilmDB(DBWrap):
 
@@ -81,7 +84,7 @@ class FilmDB(DBWrap):
         query = """SELECT title, year from %(table_name)s
                 WHERE title="%(title)s" """
         if year:
-            query += "AND year='%(year)s'"
+            query += " AND year='%(year)s'"
         return self._process_query(query % values)
 
     def query_fuzzy(self, title, year=""):
@@ -89,7 +92,7 @@ class FilmDB(DBWrap):
         query = """SELECT title, year FROM %(table_name)s 
                 WHERE ABS(LENGTH(title) - LENGTH("%(title)s")) <= %(len_diff)s""" % values
         if year:
-            query += "AND year='%(year)s'"
+            query += " AND year='%(year)s'"
         return self._process_query(query % values)
 
 

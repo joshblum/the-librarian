@@ -8,8 +8,9 @@
 """
 from librarian.constants import WORKSPACE_PATH, LOGGING, VIDEO_EXT, JOB_ENQUEUED, JOB_STARTED, JOB_INPROGRESS, JOB_FAILED, JOB_COMPLETED
 from librarian.utils import md5_for_file
-from librarian.identifiers.identifiers import HashIdentifier, TitleIdentifier
+from librarian.identifiers.identifiers import HashIdentifier
 from librarian.identifiers.movies.credits.identifier import MovieCreditIdentifier
+from librarian.identifiers.movies.title.identifier import MovieTitleIdentifier
 # from librarian.identifiers.movies.fingerprint.identifier import AudioFingerprintIdentifier
 from librarian.metastore import MetaCon
 
@@ -214,23 +215,26 @@ class MovieHandler(Handler):
         default_args = (self.srcfile, self.path)
         identifiers = [(HashIdentifier, (self.srcfile, self.path, self.md5)),
                        #(AudioFingerprintIdentifier default_args),
-                       #(TitleIdentifier, (self.srcpath, self.path)),
-                       #(TitleIdentifier, default_args),
+                       (TitleIdentifier, (self.srcpath, self.path)),
+                       (TitleIdentifier, default_args),
                        (MovieCreditIdentifier, default_args),
                        ]
+        metadata = set([])
         for identifier, args in identifiers:
             logger.debug("Running identifier %s with args %s" %
                          (identifier, args))
             identifier = identifier(*args)
-            metadata = identifier.identify()
+            data = identifier.identify()
             status = "Ran identifier %s, found metadata %s" % (
-                identifier, metadata)
+                identifier, data)
+            
+            metadata = metadata.union(data)
 
             logger.debug(status)
             self.update_progress(JOB_INPROGRESS, status)
 
-            if metadata is not None:
-                return metadata
+            # if len(metadata):
+                # return metadata
 
         return None
 

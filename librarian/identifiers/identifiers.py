@@ -95,14 +95,17 @@ class MovieIdentifier(Identifier):
         """
         res = []
         for title in titles:
-            r = requests.get(OMDB_API_URL, params={
-                't': title,
-                'tomatoes': True,
-            }).json()
-
+            params = self.get_params(title)
+            r = requests.get(OMDB_API_URL, params=params).json()
             if r['Response']:
                 res.append(self.clean_metadata(r))
         return res
+
+    def get_params(self, title):
+        return {
+            't': title,
+            'tomatoes': True,
+        }
 
     def clean_metadata(self, metadata):
         """
