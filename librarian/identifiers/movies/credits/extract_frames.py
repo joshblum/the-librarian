@@ -6,6 +6,7 @@
 from librarian.utils import get_time_delta
 import subprocess
 import shlex
+import pipes
 import re
 import os
 
@@ -19,7 +20,7 @@ FRAMERATE = "0.15"
 def extract_frames(filename, outdir, framepath):
     end_time = get_vid_len(filename)
     start_time = get_time_delta(end_time)
-    cut = os.path.join(outdir, CUT_VID % os.path.basename(filename))
+    cut = pipes.quote(os.path.join(outdir, CUT_VID % os.path.basename(filename)))
     frame = FRAME_NAME % framepath
 
     cut_vid(filename, cut, start_time, end_time)
@@ -27,8 +28,10 @@ def extract_frames(filename, outdir, framepath):
 
 
 def get_vid_len(filename):
-    call = subprocess.check_output(
-        ["ffprobe", filename], stderr=subprocess.STDOUT)
+    cmd = "ffprobe %(filename)s" % {
+        'filename': filename
+    }
+    call = subprocess.check_output(shlex.split(cmd), stderr=subprocess.STDOUT)
     return re.findall(MATCH_EXPR, call)[0]
 
 
@@ -43,6 +46,7 @@ def cut_vid(inname, outname, start_time, end_time):
         'start_time': start_time,
         'end_time': end_time,
     }
+    print 'cmd', cmd
     return subprocess.check_output(shlex.split(cmd))
 
 

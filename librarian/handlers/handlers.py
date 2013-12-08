@@ -71,14 +71,14 @@ class Handler(object):
                 self.job_id, metadata))
         except Exception, e:
 
-            logger.debug("Job failed %s, %s" % (self.job_id, e))
+            logger.exception("Job failed %s, %s" % (self.job_id, e))
             progress = JOB_FAILED
             status = str(e)
 
             metadata = None
 
         if metadata is None:
-            status += "\nUnble to identify."
+            status += "\nUnable to identify."
 
         self.finish_job(metadata, progress, status)
 
@@ -190,8 +190,12 @@ class MovieHandler(Handler):
             exception is raised.
             TODO: Join multiple files if found (i.e. movie split into two disks)
         """
+        if os.path.isdir(self.srcpath) and self.srcpath[-1] != os.sep:
+            self.srcpath += os.sep
+
         files = glob.glob("%s*" % self.srcpath)
         srcfiles = []
+        logger.debug("Found files %s" % files)
         for path in files:
             split_path = path.split(".")
             if len(split_path) and split_path[-1] in VIDEO_EXT:
@@ -215,8 +219,8 @@ class MovieHandler(Handler):
         default_args = (self.srcfile, self.path)
         identifiers = [(HashIdentifier, (self.srcfile, self.path, self.md5)),
                        #(AudioFingerprintIdentifier default_args),
-                       (TitleIdentifier, (self.srcpath, self.path)),
-                       (TitleIdentifier, default_args),
+                       (MovieTitleIdentifier, (self.srcpath, self.path)),
+                       (MovieTitleIdentifier, default_args),
                        (MovieCreditIdentifier, default_args),
                        ]
         metadata = set([])
@@ -228,14 +232,18 @@ class MovieHandler(Handler):
             status = "Ran identifier %s, found metadata %s" % (
                 identifier, data)
             
-            metadata = metadata.union(data)
+            if data is not None:
+                metadata = metadata.union(data)
 
             logger.debug(status)
             self.update_progress(JOB_INPROGRESS, status)
 
             # if len(metadata):
                 # return metadata
-
+        
+        if len(metadata):
+            return metadata
+        
         return None
 
 

@@ -5,13 +5,14 @@
 """
 
 from librarian.constants import TMDB_API_KEY
-from utils import ActorDB
+from librarian.identifiers.movies.utils import ActorDB
 
 from tmdb import tmdb
 
 MIN_INTERSECTION = 2
 
 tmdb.configure(TMDB_API_KEY)
+
 
 def find_films(tokens):
     db = ActorDB()
@@ -46,8 +47,10 @@ def get_film_intersection(tokens, match_func, db):
 def _direct_query_match(db, name_token):
     return db.query_name(name_token)
 
+
 def _normalize_text_match(db, name_token):
     return db.fuzzy_match(name_token)
+
 
 def get_films(actor_name):
     people = tmdb.People(actor_name)

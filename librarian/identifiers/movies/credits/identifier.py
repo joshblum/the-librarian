@@ -9,6 +9,7 @@ from extract_frames import extract_frames
 from extract_credits import extract_credits
 from find_films import find_films
 
+import pipes
 import os
 import logging.config
 
@@ -20,7 +21,7 @@ class MovieCreditIdentifier(MovieIdentifier):
 
     def __init__(self, srcfile, path):
         super(MovieIdentifier, self).__init__(srcfile, path)
-        
+        self.srcfile = pipes.quote(self.srcfile)
         self.credits_path = "%s/credits" % self.path
         if not os.path.exists(self.credits_path):
             os.mkdir(self.credits_path)

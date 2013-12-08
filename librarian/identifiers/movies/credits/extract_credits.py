@@ -3,15 +3,14 @@
     gathers text and returns a set of possible actors
 """
 
-from utils import parse_name
 from librarian.constants import LOGGING
 from librarian.utils import flatten
 from fuzzywuzzy import process
 from pytesser import pytesser
 from glob import glob
 
-from utils import valid_token_size, valid_name_size
-from constants import MIN_L, MAX_L, MIN_NAME_L, MAX_NAME_L
+from librarian.identifiers.movies.utils import valid_token_size, valid_name_size, parse_name
+from librarian.identifiers.movies.constants import MIN_L, MAX_L, MIN_NAME_L, MAX_NAME_L
 
 import string
 import itertools

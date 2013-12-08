@@ -47,7 +47,7 @@ class DBWrap(object):
 class ActorDB(DBWrap):
 
     def __init__(self, config=ACTORS_SQL_CONFIG):
-        super(FilmDB, self).__init__(config)
+        super(ActorDB, self).__init__(config)
 
     def _get_name_token_values(self, name_token):
         f_name, l_name = parse_name(name_token)

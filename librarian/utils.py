@@ -16,11 +16,6 @@ MIN = 5
 FMT = "%H:%M:%S"
 
 
-def replace_all(text, stopwords, repl=""):
-    for word in stopwords:
-        text = text.replace(word, repl)
-    return text
-
 def flatten(l):
     return [item for sublist in l for item in sublist]
 
