@@ -4,16 +4,16 @@ import os
 import json
 import sys
 
-def run_audio_extraction(path, srcfile, audio_path):
-    video_file = "%s%s" % (path, srcfile)
-    output = "%s%s" % (audio_path, srcfile)
-    audio_file = "%s.mp3" % audio_file
+def run_audio_extraction(srcfile, audio_path):
+    video_file = srcfile
+    output = "%s/%s" % (audio_path, "audio-output")
+    audio_file = "%s.mp3" % output
     extract_audio(video_file, audio_file)
     os.rename(audio_file, output)
     return output
 
-def get_audio_fingerprint(path, srcfile):
-    audio_file = "%s%s" % (path, srcfile)
+def get_audio_fingerprint(srcfile):
+    audio_file = srcfile
     jsonData = get_json(run_echoprint(audio_file))
     code = jsonData["code"]
     return code
@@ -29,8 +29,7 @@ def extract_audio(input_name, output_name):
     return subprocess.check_output(shlex.split(cmd), stderr=subprocess.STDOUT)
 
 def run_echoprint(input_name):
-    cmd = "./echoprint-codegen %(filepath)s%(filename)s" % {
-        "filepath": "/home/linux-laptop/Desktop/audioextract/",
+    cmd = "./echoprint-codegen %(filename)s" % {
         "filename": input_name
     }
     return subprocess.check_output(shlex.split(cmd), stderr=subprocess.STDOUT)
