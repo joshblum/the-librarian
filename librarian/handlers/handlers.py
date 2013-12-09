@@ -228,7 +228,7 @@ class MovieHandler(Handler):
             return srcfiles[0]
 
         status = "Found srcs %s." % (srcfiles)
-        self.update_progress(self.job_id, progress=JOB_FAILED, status=status)
+        self.update_progress(self.job_id, JOB_FAILED, status=status)
         return None
 
     def is_dup(self):
