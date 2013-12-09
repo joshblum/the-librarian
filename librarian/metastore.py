@@ -141,6 +141,11 @@ class MetaCon():
             'md5': bson.Binary(md5),
         })
 
+    def find_metadata_by_fingerprint(self, fingerprint):
+        return self.find_one(self.meta_collection, {
+            'fingerprint': fingerprint,
+        })
+
     def find_metadata_by_titles(self, titles):
         return self.find(self.meta_collection, {
             'data': {
