@@ -251,7 +251,7 @@ class MovieHandler(Handler):
 
             if data is not None:
                 meta_id = data['data']['_id']
-                self.update_progress(JOB_DUPLICATE, status,
+                self.update_progress(JOB_DUPLICATE, status=status,
                                      meta_id=meta_id, src=str(detector))
                 return meta_id
 
@@ -284,7 +284,7 @@ class MovieHandler(Handler):
                 metadata.append(data)
 
             logger.debug(status)
-            self.update_progress(JOB_INPROGRESS, status,
+            self.update_progress(JOB_INPROGRESS, status=status,
                                  src="identifier")
 
         return metadata
