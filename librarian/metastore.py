@@ -115,7 +115,7 @@ class MetaCon():
         """
         required_keys = [
             'entity_type',
-            'path',
+            'fingerprint',
             'md5',
         ]
         _id = '_id'
@@ -127,14 +127,16 @@ class MetaCon():
         metadata = self._clean_md5(metadata)
 
         if _id in metadata:
-            self.meta_collection.update(
+            obj_id = self.meta_collection.update(
                 {_id: metadata[_id], },
                 {'$set': {
                     'data': metadata['data']
                 }, }
             )
         else:
-            self.meta_collection.insert(metadata)
+            obj_id = self.meta_collection.insert(metadata)
+
+        return obj_id
 
     def find_metadata_by_md5(self, md5):
         return self.find_one(self.meta_collection, {
@@ -150,8 +152,8 @@ class MetaCon():
         return self.find(self.meta_collection, {
             'data': {
                 '$elemMatch': {
-                        'title': {'$in': titles},
-                    },
+            'title': {'$in': titles},
                 },
-            }
+            },
+        }
         )

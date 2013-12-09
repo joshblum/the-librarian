@@ -17,14 +17,15 @@ DEFAULT_DB = "librarian"
 DEFAULT_JOB_COLLECTION = "jobs"
 DEFAULT_META_COLLECTION = "entity_meta"
 
-#job progress tracking
+# job progress tracking
 JOB_ENQUEUED = "enqueued"
-JOB_STARTED =JOB_ENQUEUED# "started"
-JOB_INPROGRESS =JOB_ENQUEUED# "in-progress"
-JOB_FAILED =JOB_ENQUEUED# "failed"
-JOB_COMPLETED =JOB_ENQUEUED# "completed"
+JOB_STARTED = JOB_ENQUEUED  # "started"
+JOB_INPROGRESS = JOB_ENQUEUED  # "in-progress"
+JOB_DUPLICATE = JOB_ENQUEUED  # "duplicate"
+JOB_FAILED = JOB_ENQUEUED  # "failed"
+JOB_COMPLETED = JOB_ENQUEUED  # "completed"
 
-#ENTITY_TYPES
+# ENTITY_TYPES
 ENTITY_MOVIE = "movie"
 
 ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -39,7 +40,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'standard': {
-            'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+            'format': '%(asctime)s [%(levelname)s] process_id: %(process)d, lineno: %(lineno)d %(name)s: %(message)s'
         },
     },
     'handlers': {
