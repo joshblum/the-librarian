@@ -7,13 +7,13 @@ import sys
 
 #ffmpeg -i korrabackup -vcodec copy -acodec copy -ss 00:00:00 -t 00:00:30 shortkorra.avi
 
-def split_movie(pathtofile, input_name, start_time="00:00:00", end_time="00:00:30"):
-    video_file = pathtofile + input_name
-    cmd = "ffmpeg -i %(video_file)s -vcodec copy -acodec copy -ss %(start)s -t %(end)s %(output_name)s" % {
+def split_movie(input_name, output_name, start_time="00:00:00", end_time="00:10:00"):
+    video_file = input_name
+    cmd = "ffmpeg -y -i %(video_file)s -vcodec copy -acodec copy -ss %(start)s -t %(end)s %(output_name)s" % {
         'video_file': video_file,
         'start': start_time,
         'end': end_time,
-        'output_name': pathtofile + "splits/short-" + input_name + str(time.time()) + ".avi"
+        'output_name':  output_name
     }
     return subprocess.check_output(shlex.split(cmd), stderr=subprocess.STDOUT)
 
@@ -40,3 +40,4 @@ def stringify(d):
 
 if __name__ == "__main__":   
     pass
+    #split_movie("/tmp/movies/", "manofsteelsource")
