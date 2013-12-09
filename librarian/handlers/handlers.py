@@ -50,7 +50,7 @@ class Handler(object):
             Used by subclasses after self.srcfile is set.
         """
 
-        is self.srcfile is None:  # job failed
+        if self.srcfile is None:  # job failed
             return
 
         self.path = self.create_workspace()
