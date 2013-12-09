@@ -19,6 +19,7 @@ DEFAULT_META_COLLECTION = "entity_meta"
 
 # job progress tracking
 JOB_ENQUEUED = "enqueued"
+JOB_CONSUMED = "consumed"
 JOB_STARTED = "started"
 JOB_INPROGRESS = "in-progress"
 JOB_DUPLICATE = "duplicate"
