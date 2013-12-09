@@ -40,6 +40,7 @@ class Handler(object):
         self.entity_type = entity_type
         self.cleanup = cleanup
         self.metastore = MetaCon()
+        self.path = self.create_workspace()
         self.srcfile = self.set_srcfile()
         self.init_job()
 
@@ -52,8 +53,6 @@ class Handler(object):
 
         if self.srcfile is None:  # job failed
             return
-
-        self.path = self.create_workspace()
         self.md5 = self.get_content_hash()
         self.fingerprint = None  # self.get_content_fingerprint()
 
