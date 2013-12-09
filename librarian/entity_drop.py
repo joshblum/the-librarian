@@ -52,6 +52,7 @@ def entity_queue():
         for job in jobs:
             logger.debug("Found job %s" % job)
             q.put(job)
+        break
         time.sleep(SLEEP)
 
     # block until all tasks are done

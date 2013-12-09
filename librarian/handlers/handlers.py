@@ -12,7 +12,8 @@ from librarian.utils import md5_for_file
 from librarian.identifiers.identifiers import HashIdentifier
 from librarian.identifiers.movies.credits.identifier import MovieCreditIdentifier
 from librarian.identifiers.movies.title.identifier import MovieTitleIdentifier
-# from librarian.identifiers.movies.fingerprint.identifier import AudioFingerprintIdentifier
+from librarian.identifiers.movies.audio.identifier import MovieAudioIdentifier
+from librarian.identifiers.movies.audio.extract_audio import fingerprint_for_file
 from librarian.metastore import MetaCon
 
 import logging.config
@@ -50,6 +51,7 @@ class Handler(object):
         """
         self.path = self.create_workspace()
         self.md5 = self.get_content_hash()
+        self.fingerprint = self.get_content_fingerprint()
 
         logger.debug("Updating job %s" % self.job_id)
 
@@ -81,7 +83,7 @@ class Handler(object):
             logger.exception("Job failed %s, %s" % (self.job_id, e))
             progress = JOB_FAILED
             status = str(e)
-        
+
         if metadata is None and meta_id is not None:
             status += "\nUnable to identify."
 
@@ -94,7 +96,7 @@ class Handler(object):
         """
         # TODO update dstpath
         logger.debug("Adding %s metadata" % metadata)
-        
+
         if meta_id is None:
             meta_id = self.add_entity_metadata(metadata)
 
@@ -137,7 +139,7 @@ class Handler(object):
             metadata = {
                 'entity_type': self.entity_type,
                 'md5': self.md5,
-                'fingerprint': None,  # self.md5,
+                'fingerprint': self.fingerprint,
                 'data': metadata
             }
             logger.debug("Adding metadata %s" % metadata)
@@ -162,6 +164,14 @@ class Handler(object):
         """
 
         return md5_for_file(self.srcfile)
+
+    def get_content_fingerprint(self):
+        """
+            Returns the fingerprint of self.srcfile
+            self.srcfile is set by subclasses
+        """
+
+        return fingerprint_for_file(self.path, self.srcfile)
 
     def is_dup(self):
         """
@@ -221,7 +231,7 @@ class MovieHandler(Handler):
         """
         default_args = (self.srcfile, self.path)
         dup_detectors = [(HashIdentifier, (self.srcfile, self.path, self.md5)),
-                         #(AudioFingerprintIdentifier default_args),
+                         (MovieAudioIdentifier, default_args),
                          ]
         for detector, args in dup_detectors:
             logger.debug("Running dedup detector %s with args %s" %
@@ -238,7 +248,7 @@ class MovieHandler(Handler):
             if data is not None:
                 meta_id = data['data']['_id']
                 self.update_progress(JOB_DUPLICATE, status,
-                                     meta_id=meta_id)
+                                     meta_id=meta_id, src=str(detector))
                 return meta_id
 
         return None
@@ -270,7 +280,8 @@ class MovieHandler(Handler):
                 metadata.append(data)
 
             logger.debug(status)
-            self.update_progress(JOB_INPROGRESS, status)
+            self.update_progress(JOB_INPROGRESS, status, 
+                src="identifier")
 
         return metadata
 
