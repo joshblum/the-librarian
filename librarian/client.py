@@ -42,4 +42,4 @@ def add_jobs(lim=5):
             break
 
 if __name__ == "__main__":
-    add_jobs()
+    add_jobs(float('inf'))
