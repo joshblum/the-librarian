@@ -7,7 +7,7 @@
 
 from handlers import handlers
 from metastore import MetaCon
-from constants import MAX_PROCESSES, ENTITY_MOVIE, LOGGING
+from constants import MAX_PROCESSES, ENTITY_MOVIE, LOGGING, JOB_CONSUMED
 
 from multiprocessing import Process, Queue
 from threading import Thread
@@ -51,6 +51,7 @@ def entity_queue():
 
         for job in jobs:
             logger.debug("Found job %s" % job)
+            metacon.update_job(job['job_id'], progress=JOB_CONSUMED)
             q.put(job)
         time.sleep(SLEEP)
 
