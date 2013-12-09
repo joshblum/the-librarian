@@ -231,7 +231,7 @@ class MovieHandler(Handler):
         """
         default_args = (self.srcfile, self.path)
         dup_detectors = [(HashIdentifier, (self.srcfile, self.path, self.md5)),
-                         (MovieAudioIdentifier, default_args),
+    #                     (MovieAudioIdentifier, default_args),
                          ]
         for detector, args in dup_detectors:
             logger.debug("Running dedup detector %s with args %s" %
