@@ -11,6 +11,8 @@ import logging.config
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger(__name__)
 
+ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
+
 
 def run_audio_extraction(srcfile, audio_path):
     video_file = srcfile
@@ -40,10 +42,10 @@ def extract_audio(input_name, output_name):
 
 
 def run_echoprint(input_name):
-    cmd = "./echoprint-codegen %(filename)s" % {
+    cmd = "%(path)s/echoprint-codegen %(filename)s" % {
+        "path" : ROOT_PATH,
         "filename": input_name
     }
-    print 'cmd', cmd
     return subprocess.check_output(shlex.split(cmd), stderr=subprocess.STDOUT)
 
 
@@ -68,5 +70,6 @@ def fingerprint_for_file(path, srcfile):
     return audio_fingerprint
 
 if __name__ == "__main__":
+    print ROOT_PATH
     pass
     #extract_audio( "path to the movie file", "path to the movie file .mp3")

@@ -89,7 +89,7 @@ class MetaCon():
         return collection.find(query)
 
     def get_job_doc(self, job_id, entity_type, srcpath, dstpath=None,
-                    md5=None, progress=JOB_ENQUEUED,
+                    md5=None, src=None, progress=JOB_ENQUEUED,
                     status="", timestamp=datetime.now(),
                     meta_id=None):
         """
@@ -98,6 +98,7 @@ class MetaCon():
         return {
             'job_id': job_id,
             'entity_type': entity_type,
+            'src': src,
             'srcpath': srcpath,
             'dstpath': dstpath,
             'md5': md5,
