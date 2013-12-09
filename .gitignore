@@ -1,6 +1,7 @@
 .DS_Store
 *.py[cod]
-echoprint-codegen 
+librarian/identifiers/movies/audio/echoprint-codegen
+
 # C extensions
 *.so
 
