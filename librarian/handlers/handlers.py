@@ -150,7 +150,7 @@ class Handler(object):
             meta_id = self.metastore.add_entity_metadata(metadata)
         return meta_id
 
-    def update_progress(self, progress, status="", **kwargs):
+    def update_progress(self, progress, **kwargs):
         """
             Update the status of the current job
             Optionally add a status message.
@@ -158,7 +158,6 @@ class Handler(object):
         logger.debug("Updating job %s to progress %s" % (
             self.job_id, progress))
         kwargs['progress'] = progress
-        kwargs['status'] = status
         self.metastore.update_job(self.job_id, **kwargs)
 
     def get_content_hash(self):
