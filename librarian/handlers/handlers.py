@@ -227,7 +227,7 @@ class MovieHandler(Handler):
         if len(srcfiles) == 1:
             return srcfiles[0]
 
-        status = "Found srcs %s for %s" % (srcfiles, self.srcfile)
+        status = "Found srcs %s." % (srcfiles)
         self.update_job(self.job_id, progress=JOB_FAILED, status=status)
         return None
 
