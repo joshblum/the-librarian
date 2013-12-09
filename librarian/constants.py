@@ -19,11 +19,11 @@ DEFAULT_META_COLLECTION = "entity_meta"
 
 # job progress tracking
 JOB_ENQUEUED = "enqueued"
-JOB_STARTED = JOB_ENQUEUED  # "started"
-JOB_INPROGRESS = JOB_ENQUEUED  # "in-progress"
-JOB_DUPLICATE = JOB_ENQUEUED  # "duplicate"
-JOB_FAILED = JOB_ENQUEUED  # "failed"
-JOB_COMPLETED = JOB_ENQUEUED  # "completed"
+JOB_STARTED = "started"
+JOB_INPROGRESS = "in-progress"
+JOB_DUPLICATE = "duplicate"
+JOB_FAILED = "failed"
+JOB_COMPLETED = "completed"
 
 # ENTITY_TYPES
 ENTITY_MOVIE = "movie"

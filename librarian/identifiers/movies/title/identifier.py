@@ -20,9 +20,15 @@ logger = logging.getLogger(__name__)
 YEAR = r'\d{4}'
 
 STOPWORDS = set([
-    'avi', '()', '[]', 'dvdrip', 'xvid', 'axxo', 'eng', 'nfo', 'txt', 'donatello', 'axial', 'mi2', 'alli', 'p2p', 'sample', 'srt', 'jpg', 'subs', 'ac3', 'com', 'cd1', 'demonoid', 'fxg', 'thereaderb', 'cd2', 'thereadera', 'klaxxon', 'in', 'sub', 'edition', 'mkv', 'rar', 'trailer', 'dmd',
+    'avi', '', 'dvdrip', 'xvid', 'axxo', 'eng', 'nfo', 'txt', 'donatello', 'axial', 'mi2', 'alli', 'p2p', 'sample', 'srt', 'jpg', 'subs', 'ac3', 'com', 'cd1', 'demonoid', 'fxg', 'thereaderb', 'cd2', 'thereadera', 'klaxxon', 'in', 'sub', 'edition', 'mkv', 'rar', 'trailer', 'dmd',
     'divx', 'dvd', 'unrated', 'png', 'sfv', 'theatrical', 'vob', 'dvdscr', 'dr', 'ii', 'x264', 'www', 'cover', 'documentary', 'limited', 'downloaded', 'read', 'part', 'torrent', 'mbc', 'cdcovers_cc', 'frontcover', '720p', 'iii', 'special', 'ws',  'waf', 'dts',  'rip', 'ue', 'bluray']).union(VIDEO_EXT)
 
+def check_stop_words(token):
+    words = ['%s', '(%s)', '[%s]']
+    for word in words:
+        if word % token in STOPWORDS:
+            return True
+    return False
 
 class MovieTitleIdentifier(MovieIdentifier):
 
@@ -73,7 +79,7 @@ class TitleParser(object):
         """
         title = re.sub(YEAR, "", title).lower()
         title = re.findall(r"[\w'\(\)\[\]]+", title)
-        title = filter(lambda x: x not in STOPWORDS, title)
+        title = filter(check_stop_words, title)
         if len(title) and title[-1] == 'the':
             title = [title[-1]] + title[:-1]
         return " ".join(title).replace('"', "'")

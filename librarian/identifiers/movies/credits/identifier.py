@@ -32,7 +32,6 @@ class MovieCreditIdentifier(MovieIdentifier):
         logger.debug("Retrieving credit tokens.")
 
         credit_tokens = extract_credits(self.credits_path)
-        logger.debug(credit_tokens)
 
         films = find_films(credit_tokens)
         logger.debug(films)
