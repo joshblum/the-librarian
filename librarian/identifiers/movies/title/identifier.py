@@ -24,11 +24,10 @@ STOPWORDS = set([
     'divx', 'dvd', 'unrated', 'png', 'sfv', 'theatrical', 'vob', 'dvdscr', 'dr', 'ii', 'x264', 'www', 'cover', 'documentary', 'limited', 'downloaded', 'read', 'part', 'torrent', 'mbc', 'cdcovers_cc', 'frontcover', '720p', 'iii', 'special', 'ws',  'waf', 'dts',  'rip', 'ue', 'bluray']).union(VIDEO_EXT)
 
 def check_stop_words(token):
-    words = ['%s', '(%s)', '[%s]']
-    for word in words:
-        if word % token in STOPWORDS:
-            return True
-    return False
+    replace = ["(", ")", "[", "]"]
+    for r in replace:
+        word.replace(r, "")
+    return word in STOPWORDS
 
 class MovieTitleIdentifier(MovieIdentifier):
 

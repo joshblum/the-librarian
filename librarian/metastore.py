@@ -89,9 +89,9 @@ class MetaCon():
         return collection.find(query)
 
     def get_job_doc(self, job_id, entity_type, srcpath, dstpath=None,
-                    md5=None, src=None, progress=JOB_ENQUEUED,
-                    status="", timestamp=datetime.now(),
-                    meta_id=None):
+                    md5=None, src=None, fingerprint=None,
+                    progress=JOB_ENQUEUED, status="",
+                    timestamp=datetime.now(), meta_id=None):
         """
             Util for creating a job type document.
         """
@@ -102,6 +102,7 @@ class MetaCon():
             'srcpath': srcpath,
             'dstpath': dstpath,
             'md5': md5,
+            'fingerprint': fingerprint,
             'progress': progress,
             'status': status,
             'timestamp': timestamp,

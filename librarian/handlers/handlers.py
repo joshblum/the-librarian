@@ -51,7 +51,7 @@ class Handler(object):
         """
         self.path = self.create_workspace()
         self.md5 = self.get_content_hash()
-        self.fingerprint = self.get_content_fingerprint()
+        self.fingerprint = None#self.get_content_fingerprint()
 
         logger.debug("Updating job %s" % self.job_id)
 

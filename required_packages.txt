@@ -1,4 +1,4 @@
-sudo apt-get install ffmpeg libboost1.42-dev libtag1-dev zlib1g-dev mongodb-server
+sudo apt-get install ffmpeg libboost1.42-dev libtag1-dev zlib1g-dev mongodb-server libavcodec-extra-53 
 
 https://github.com/echonest/echoprint-codegen
 https://github.com/joshblum/tmdb
