@@ -157,9 +157,9 @@ class Handler(object):
         """
         logger.debug("Updating job %s to progress %s" % (
             self.job_id, progress))
-        self.metastore.update_job(self.job_id,
-                                  progress=progress,
-                                  status=status, **kwargs)
+        kwargs['progress'] = progress
+        kwargs['status'] = status
+        self.metastore.update_job(self.job_id, **kwargs)
 
     def get_content_hash(self):
         """
