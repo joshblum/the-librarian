@@ -117,7 +117,8 @@ class MovieIdentifier(Identifier):
         """
         clean_meta = {}
         for key, clean_key in self.metadata_map.iteritems():
-            clean_meta[clean_key] = metadata[key]
+            if key in metadata:
+                clean_meta[clean_key] = metadata[key]
         return clean_meta
 
 

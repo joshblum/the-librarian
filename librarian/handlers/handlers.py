@@ -49,9 +49,13 @@ class Handler(object):
             Adds job_id, path, and contents hash.
             Used by subclasses after self.srcfile is set.
         """
+
+        is self.srcfile is None:  # job failed
+            return
+
         self.path = self.create_workspace()
         self.md5 = self.get_content_hash()
-        self.fingerprint = None#self.get_content_fingerprint()
+        self.fingerprint = None  # self.get_content_fingerprint()
 
         logger.debug("Updating job %s" % self.job_id)
 
@@ -223,7 +227,9 @@ class MovieHandler(Handler):
         if len(srcfiles) == 1:
             return srcfiles[0]
 
-        raise Exception("More than one possible srcfile for %s" % self.srcpath)
+        status = "Found srcs %s for %s" % (srcfiles, self.srcfile)
+        self.update_job(self.job_id, progress=JOB_FAILED, status=status)
+        return None
 
     def is_dup(self):
         """
@@ -231,7 +237,7 @@ class MovieHandler(Handler):
         """
         default_args = (self.srcfile, self.path)
         dup_detectors = [(HashIdentifier, (self.srcfile, self.path, self.md5)),
-    #                     (MovieAudioIdentifier, default_args),
+                         #                     (MovieAudioIdentifier, default_args),
                          ]
         for detector, args in dup_detectors:
             logger.debug("Running dedup detector %s with args %s" %
@@ -280,8 +286,8 @@ class MovieHandler(Handler):
                 metadata.append(data)
 
             logger.debug(status)
-            self.update_progress(JOB_INPROGRESS, status, 
-                src="identifier")
+            self.update_progress(JOB_INPROGRESS, status,
+                                 src="identifier")
 
         return metadata
 
