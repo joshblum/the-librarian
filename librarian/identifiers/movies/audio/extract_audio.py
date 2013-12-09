@@ -11,8 +11,6 @@ import logging.config
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger(__name__)
 
-ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
-
 
 def run_audio_extraction(srcfile, audio_path):
     video_file = srcfile
@@ -42,7 +40,7 @@ def extract_audio(input_name, output_name):
 
 
 def run_echoprint(input_name):
-    cmd = "%(path)s/echoprint-codegen %(filename)s" % {
+    cmd = "echoprint-codegen %(filename)s" % {
         "path" : ROOT_PATH,
         "filename": input_name
     }
