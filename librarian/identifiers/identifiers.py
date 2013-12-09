@@ -132,7 +132,6 @@ class HashIdentifier(Identifier):
     def get_titles(self):
         logger.debug("Getting titles for %s" % self.srcfile)
         metadata = self.metastore.find_metadata_by_md5(self.md5)
-        logger.debug("Found metadata %s" % metadata)
         if metadata is None:
             return None
         return [item['title'] 
