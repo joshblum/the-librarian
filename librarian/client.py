@@ -6,7 +6,7 @@ import logging.config
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger(__name__)
 
-PATH = "/bomber/media/Movies/Other"
+PATH = "/bomber/media/Movies/Other/"
 URL = "%s:%s" % (HOST, PORT)
 
 
@@ -15,7 +15,7 @@ def get_url(path):
 
 
 def get_paths(path=PATH):
-    return [path for path in glob.glob("%s*")]
+    return glob.glob("%s*" % path)
 
 
 def add_job(srcpath):
@@ -36,7 +36,8 @@ def check_job(job_id):
 def add_jobs(lim=5):
     paths = get_paths()
     for i, path in enumerate(paths):
-        add_job(path)
+        logger.debug("Adding %s to job queue" % path)
+	add_job(path)
         if i > lim:
             break
 

@@ -2995,3 +2995,4 @@ AssertionError
 2013-12-09 02:52:31,223 [DEBUG] process_id: 24725, lineno: 76 handlers.handlers: Job 35db1a59-de22-47ae-9a0b-0ec8e3e4845d marked as duplicate
 2013-12-09 02:52:31,224 [DEBUG] process_id: 24725, lineno: 98 handlers.handlers: Adding None metadata
 2013-12-09 02:52:31,225 [DEBUG] process_id: 24725, lineno: 130 handlers.handlers: Removing dir /Users/joshblum/Dropbox/code/the-librarian/librarian/.librarian/35db1a59-de22-47ae-9a0b-0ec8e3e4845d
+2013-12-09 05:30:41,681 [DEBUG] process_id: 32430, lineno: 39 __main__: Adding /bomber/media/Movies/Other/Touching the Void to job queue
