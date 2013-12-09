@@ -53,6 +53,7 @@ class Handler(object):
 
         if self.srcfile is None:  # job failed
             return
+
         self.md5 = self.get_content_hash()
         self.fingerprint = None  # self.get_content_fingerprint()
 
@@ -66,6 +67,10 @@ class Handler(object):
         """
             Run the handler.
         """
+
+        if self.srcfile is None:  # job failed
+            return
+        
         self.update_progress(JOB_INPROGRESS)
 
         progress = JOB_COMPLETED
