@@ -2,6 +2,7 @@ from librarian.constants import LOGGING
 from librarian.identifiers.identifiers import MovieIdentifier
 from extract_audio import *
 
+from movie_utils import *
 
 import os
 import logging.config
@@ -19,17 +20,21 @@ class MovieAudioIdentifier(MovieIdentifier):
         if not os.path.exists(self.audio_path):
             os.mkdir(self.audio_path)
 
+
     def get_audio_fingerprint(self):
-        run_audio_extraction(self.srcfile, self.audio_path)
+        short_movie = "%s/short.avi" % self.audio_path
+        split_movie(self.srcfile, short_movie )
+        run_audio_extraction(short_movie, self.audio_path)
         logger.debug("Extracting audio...")
-        audio_fingerprint = get_audio_fingerprint(self.srcfile)
+        audio_fingerprint = get_audio_fingerprint(short_movie)
         return audio_fingerprint
 
     def get_titles(self):
         audio_fingerprint = self.get_audio_fingerprint()
-        metadata = self.metastore.find_metadata_by_fingerprint(audio_fingerprint)
-        if metadata is None:
-            return []
+        return audio_fingerprint
+        #metadata = self.metastore.find_metadata_by_fingerprint(audio_fingerprint)
+        #if metadata is None:
+        #    return []
         #return [item['title'] for item in metadata['data']]
 
 if __name__ == "__main__":
