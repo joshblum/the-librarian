@@ -20,6 +20,9 @@ class Identifier(object):
         self.path = path
         self.metastore = MetaCon()
 
+    def __str__(self):
+        return self.__class__.__name__
+
     def identify(self):
         """
             Generic method to identify files.
@@ -129,9 +132,12 @@ class HashIdentifier(Identifier):
     def get_titles(self):
         logger.debug("Getting titles for %s" % self.srcfile)
         metadata = self.metastore.find_metadata_by_md5(self.md5)
+        logger.debug("Found metadata %s" % metadata)
         if metadata is None:
             return None
-        return [item['title'] for item in metadata['data']]
+        return [item['title'] 
+            for data in metadata['data'] 
+                for item in data['data']]
 
     def get_title_metadata(self, titles):
         return self.metastore.find_metadata_by_md5(self.md5)

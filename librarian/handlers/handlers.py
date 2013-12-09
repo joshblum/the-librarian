@@ -6,7 +6,8 @@
     Responsible for adding data to the metastore
     if an entity is identified.
 """
-from librarian.constants import WORKSPACE_PATH, LOGGING, VIDEO_EXT, JOB_ENQUEUED, JOB_STARTED, JOB_INPROGRESS, JOB_FAILED, JOB_COMPLETED
+from librarian.constants import WORKSPACE_PATH, LOGGING,\
+    VIDEO_EXT, JOB_ENQUEUED, JOB_STARTED, JOB_INPROGRESS, JOB_FAILED, JOB_COMPLETED, JOB_DUPLICATE
 from librarian.utils import md5_for_file
 from librarian.identifiers.identifiers import HashIdentifier
 from librarian.identifiers.movies.credits.identifier import MovieCreditIdentifier
@@ -65,43 +66,42 @@ class Handler(object):
         progress = JOB_COMPLETED
         status = ""
 
+        metadata = None
+        meta_id = None
         try:
-            metadata = self.get_entity_metadata()
-            logger.debug("Job %s Found metadata %s" % (
-                self.job_id, metadata))
+            meta_id = self.is_dup()
+            if meta_id is not None:
+                logger.debug("Job %s marked as duplicate" % self.job_id)
+            else:
+                metadata = self.get_entity_metadata()
+                logger.debug("Job %s Found metadata %s" % (
+                    self.job_id, metadata))
         except Exception, e:
 
             logger.exception("Job failed %s, %s" % (self.job_id, e))
             progress = JOB_FAILED
             status = str(e)
-
-            metadata = None
-
-        if metadata is None:
+        
+        if metadata is None and meta_id is not None:
             status += "\nUnable to identify."
 
-        self.finish_job(metadata, progress, status)
+        self.finish_job(meta_id, metadata, progress, status)
 
-    def finish_job(self, metadata, progress, status):
+    def finish_job(self, meta_id, metadata, progress, status):
         """
             Close the job out and add the metadata
             to the metastore
         """
         # TODO update dstpath
-        logger.debug("Job %s updating metadata %s" % (
-            self.job_id, metadata))
+        logger.debug("Adding %s metadata" % metadata)
         
-        meta_id = None
+        if meta_id is None:
+            meta_id = self.add_entity_metadata(metadata)
 
-        if metadata is not None and '_id' in metadata['data']:
-            meta_id = metadata['data']['_id'] 
-        
         self.metastore.update_job(self.job_id, meta_id=meta_id,
-                                  dstpath="", progress=progress, 
+                                  dstpath="", progress=progress,
                                   status=status)
 
-        logger.debug("Adding %s metadata" % metadata)
-        self.add_entity_metadata(metadata)
         self.cleanup_workspace()
 
     def create_workspace(self):
@@ -132,17 +132,19 @@ class Handler(object):
         """
             Add the metadata to the datastore
         """
+        meta_id = None
         if metadata is not None:
             metadata = {
                 'entity_type': self.entity_type,
-                'path': self.srcfile,
                 'md5': self.md5,
-                'data': metadata['data']
+                'fingerprint': None,  # self.md5,
+                'data': metadata
             }
             logger.debug("Adding metadata %s" % metadata)
-            self.metastore.add_entity_metadata(metadata)
+            meta_id = self.metastore.add_entity_metadata(metadata)
+        return meta_id
 
-    def update_progress(self, progress, status=""):
+    def update_progress(self, progress, status="", **kwargs):
         """
             Update the status of the current job
             Optionally add a status message.
@@ -151,7 +153,7 @@ class Handler(object):
             self.job_id, progress))
         self.metastore.update_job(self.job_id,
                                   progress=progress,
-                                  status=status)
+                                  status=status, **kwargs)
 
     def get_content_hash(self):
         """
@@ -160,6 +162,13 @@ class Handler(object):
         """
 
         return md5_for_file(self.srcfile)
+
+    def is_dup(self):
+        """
+            Abstract method to check if the entity is a duplicate
+            or not.
+        """
+        raise NotImplementedError
 
     def set_srcfile(self):
         """
@@ -206,24 +215,48 @@ class MovieHandler(Handler):
 
         raise Exception("More than one possible srcfile for %s" % self.srcpath)
 
+    def is_dup(self):
+        """
+            Checks audio fingerprint and simple hash for duplicates
+        """
+        default_args = (self.srcfile, self.path)
+        dup_detectors = [(HashIdentifier, (self.srcfile, self.path, self.md5)),
+                         #(AudioFingerprintIdentifier default_args),
+                         ]
+        for detector, args in dup_detectors:
+            logger.debug("Running dedup detector %s with args %s" %
+                         (detector, args))
+
+            detector = detector(*args)
+            data = detector.identify()
+
+            status = "Ran detector %s, found metadata %s" % (
+                detector, data)
+
+            logger.debug(status)
+
+            if data is not None:
+                meta_id = data['data']['_id']
+                self.update_progress(JOB_DUPLICATE, status,
+                                     meta_id=meta_id)
+                return meta_id
+
+        return None
+
     def get_entity_metadata(self):
         """
             Tries to identify the srcfile with the following steps
-            1. Simple hash
-            2. Title matching #TODO
-                2.1 srcpath
-                2.2 srcfile
-            3. Credit matching
-            4. Audio fingerprinting #TODO
+            1. Title matching
+                1.1 srcpath
+                1.2 srcfile
+            2. Credit matching
         """
         default_args = (self.srcfile, self.path)
-        identifiers = [(HashIdentifier, (self.srcfile, self.path, self.md5)),
-                       #(AudioFingerprintIdentifier default_args),
-                       (MovieTitleIdentifier, (self.srcpath, self.path)),
+        identifiers = [(MovieTitleIdentifier, (self.srcpath, self.path)),
                        (MovieTitleIdentifier, default_args),
                        (MovieCreditIdentifier, default_args),
                        ]
-        metadata = set([])
+        metadata = []
         for identifier, args in identifiers:
             logger.debug("Running identifier %s with args %s" %
                          (identifier, args))
@@ -231,20 +264,15 @@ class MovieHandler(Handler):
             data = identifier.identify()
             status = "Ran identifier %s, found metadata %s" % (
                 identifier, data)
-            
+
             if data is not None:
-                metadata = metadata.union(data)
+                data['src'] = str(identifier)
+                metadata.append(data)
 
             logger.debug(status)
             self.update_progress(JOB_INPROGRESS, status)
 
-            # if len(metadata):
-                # return metadata
-        
-        if len(metadata):
-            return metadata
-        
-        return None
+        return metadata
 
 
 class DummyHandler(Handler):
