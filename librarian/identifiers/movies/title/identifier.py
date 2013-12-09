@@ -27,7 +27,7 @@ def check_stop_words(token):
     replace = ["(", ")", "[", "]"]
     for r in replace:
         token.replace(r, "")
-    return token in STOPWORDS
+    return token not in STOPWORDS
 
 class MovieTitleIdentifier(MovieIdentifier):
 
