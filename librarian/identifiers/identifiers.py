@@ -132,11 +132,10 @@ class HashIdentifier(Identifier):
 
     def get_titles(self):
         logger.debug("Getting titles for %s" % self.srcfile)
-        title = 'title'
         metadata = self.metastore.find_metadata_by_md5(self.md5)
         if metadata is None:
             return None
-        return [item[title] if title in item
+        return [item['title']
             for data in metadata['data'] 
                 for item in data['data']]
 
