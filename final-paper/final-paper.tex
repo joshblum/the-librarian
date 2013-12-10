@@ -78,7 +78,7 @@
 \section{Introduction and Motivation}
 %TODO
 %------------------------------------------------
-Entity matching is nontrivial and especially difficult when each entity is large. The Librarian aims to perform automatic entity resolution across various media types. Given sets of text, audio, image, and video files, The Librarian can merge the sets of entities by de-­duplicating the files, gathering metadata from trusted sources, (i.e. IMDB, Rotten Tomato, and Spotify APIs), and categorizing the media based on the metadata that is found. \\
+Entity matching is nontrivial and especially difficult when each entity is large. The Librarian aims to perform automatic entity resolution across various media types. Given sets of text, audio, image, and video files, The Librarian can merge the sets of entities by deduplicating the files, gathering metadata from trusted sources, (i.e. IMDB, Rotten Tomato, and Spotify APIs), and categorizing the media based on the metadata that is found. \\
 
 The motivation behind the system is to be able to handle large dumps of data as well as incremental updates over a large corpus of files with many contributers. The Librarian serves as a background system upon which clients can be built which handler user interaction to add and modify data within the system.\\
 
@@ -90,7 +90,6 @@ We begin by discussing related work (\ref{sec:related-work}), providing a system
 
 \section{Related Work}
 \label{sec:related-work}
-%TODO NOLANDDDDD
 %------------------------------------------------
 Shazam
 
@@ -98,7 +97,7 @@ Shazam is a widely known service that specializes in identifying songs. Shazam h
 
 They then query users for a 10 second audio sample, and they are able to generate an audio fingerprint from these and cross-match with their large data sample. An important part of their service is that they have the ability to use the service even with background noise. Shazam uses different filtering algorithms to reduce background noise and get better samples. 
 
-Additionally, in order to prevent enourmous data storage - (think every song times large amount of time sliding windows) 
+Additionally, in order to prevent enormous data storage - (think every song times large amount of time sliding windows) they developed a method of fingerprinting audio samples based on tone intensity, which allowed them to get more representative 
 
 Audible Magic [ music/tv audio fingerprinting ]
 
@@ -107,13 +106,21 @@ Audible Magic [ music/tv audio fingerprinting ]
 
 \section{System Overview}
 \label{sec:system-overview}
+The Librarian is architected to accept jobs over a local HTTP server and ingest them into the system. A job consists of a single entity to be identified. Following the flow of Figure \ref{fig:system-overview} a job is first queued and then consumed by a worker process. Worker processes then identify the entity type and apply the handler for this type. The system currently only accepts movie entities, however this can extended to allow multiple handlers by using file extensions to differentiate entity types. A handler type then performs two steps to ingest the entity, first a deduplication step, and if the entity is not a duplicate, an identification step. Deduplication looks at the internal metadata store of The Librarian whereas identification looks at outside sources to establish ground truth. The details of these algorithms are discussed further for the movie entity type.
 
+data added to metastore, job_id maps to metadata_id
 
 %------------------------------------------------
 
-\subsection{Architecture}
-\label{sec:architecture}
-%TODO
+\subsection{Deduplication}
+\label{sec:deduplication}
+
+\subsubsection{Movie Entities}
+\label{sec:dedup-movie-entities}
+The deduplication process for movie entities consists of two steps. First a md5 hash is computed across the contents of the file and the metadata store is checked for any matches. This approach is brittle since the duplicate entities can still appear if two instances of the same film are added with different resolutions. A more flexible approach is to compute an audio fingerprint. We compute a fingerprint across a subsection of the file (first 10 minutes) since only a short duration is needed and the running time for computing a fingerprint across the entire file increases exponentially with file size. 
+
+%%nolan add paragraph about audio fingerprinting
+
 
 %------------------------------------------------
 
