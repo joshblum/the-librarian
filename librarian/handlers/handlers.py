@@ -55,7 +55,11 @@ class Handler(object):
             return
 
         self.md5 = self.get_content_hash()
-        self.fingerprint = self.get_content_fingerprint()
+        
+        try:
+            self.fingerprint = self.get_content_fingerprint()
+        except Exception, e:
+            self.fingerprint = None
 
         logger.debug("Updating job %s" % self.job_id)
 
