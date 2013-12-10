@@ -77,13 +77,13 @@
 
 \section{Motivation}
 %------------------------------------------------
-Entity matching is nontrivial and especially difficult when each entity is large. The Librarian aims to perform automatic entity resolution across various media types. Given sets of text, audio, image, and video files, The Librarian can merge the sets of entities by deduplicating the files, gathering metadata from trusted sources, (i.e. IMDB, Rotten Tomato, and Spotify APIs), and categorizing the media based on the metadata that is found. \\
+Entity matching is nontrivial and especially difficult when each entity is large. The Librarian aims to perform automated entity resolution across various media types. Given sets of text, audio, image, and video files, The Librarian can merge the sets of entities by deduplicating the files, identifying files by gathering metadata from trusted sources, (i.e. IMDB, Rotten Tomato, and Spotify APIs), and categorizing the media based on the metadata that is found. \\
 
-The motivation behind the system is to be able to handle large dumps of data as well as incremental updates over a large corpus of files with many contributers. The Librarian serves as a background system upon which clients can be built which handler user interaction to add and modify data within the system.\\
+The motivation behind the system is to be able to handle large dumps of data as well as incremental updates over a large corpus of files with many contributers. The Librarian serves as a background system upon which clients can be built which handler user interaction to add and modify data within the system. An example is having a client that accepts torrent files which are then given for ingestion or a client that offers crowd sourced resolution based on the automated results.\\
 
-The initial system has been tested with approximately 6 TB of seed data that has been collected from several sources. This data was used as training data for testing and developing our matching algorithms. Only movie entities were categorized from this corpus, although the matching algorithms can be extended to work with other media types such as audio, image, or text files. \\
+The initial system has been tested with approximately 6 TB of seed data that has been collected from several sources. This data was used as training data for testing and developing our identification algorithms. Only movie entities were categorized from this corpus, although the matching algorithms can be extended to work with other media types such as audio, image, or text files. The design discusses these extensions although the actual implementation will be part of future work.\\
 
-In addition to trying to algorithmically resolve two entities, crowd sourcing is used to establish ground truth where necessary. If there are multiple matches for a single entity a user can select the correct metadata for the entity or input their own.\\
+In addition to trying to algorithmically resolve two entities, crowd sourcing can be used to establish ground truth where necessary. If there are multiple matches for a single entity a user can select the correct metadata for the entity or input their own. The Librarian offers network interface for modifications to the metadata it collects by which a crowd sourcing client could interact with.\\
 
 We begin by discussing related work (\ref{sec:related-work}), providing a system design overview (\ref{sec:system-overview}), showing an analysis of the system's performance (\ref{sec:performance}), list goals for future work (\ref{sec:future-work}), and conclusions of the project (\ref{sec:conclusions}).
 
@@ -94,24 +94,29 @@ We begin by discussing related work (\ref{sec:related-work}), providing a system
 \subsection{Shazam}
 \label{sec:shazam}
 
-Shazam is a widely known service that specializes in identifying songs. Shazam has the ability to create audio fingerprints from given audio files or samples. They initially built a large database of audio fingerprints from thousands of sounds to use as ground truth. \\
+Shazam is a widely known service that specializes in identifying songs by creating audio fingerprints from (noisy) audio samples. By using a large seed database of fingerprints, Shazam is able to establish ground truth for their matching. \\
 
-They then query users for a 10 second audio sample, and they are able to generate an audio fingerprint from these and cross-match with their large data sample. An important part of their service is that they have the ability to use the service even with background noise. Shazam uses different filtering algorithms to reduce background noise and get better samples. \\
-
-Additionally, in order to prevent enormous data storage - (think every song times large amount of time sliding windows) they developed a method of fingerprinting audio samples based on tone intensity, which allowed them to get more representative fingerprints.
+Users provide a ten second audio sample to be fingerprinted and matched against their data set. An important part of their service is that they have the ability to use the service even with background noise. Shazam uses different filtering algorithms to reduce background noise and get better samples. Shazam also optimizes storage costs by fingerprinting audio samples based on tone intensity, which allowed them to get more representative fingerprints. \\
 
 \subsection{Audible Magic}
 \label{sec:audible-magic}
 
-Similar to Shazam, Audible Magic created a large collection of data that allows users to query audio from video files such as TV shows and movies. They also provide certain SDKs for a price, but those prices were too high for us to consider using. Most of their utility comes from having a large collection of data and having large amount of fingerprints that they leverage as a service. Although open source databases containing audio fingerprints are readily available online, video fingerprinting does not have the same amount of open data that is readily available.
-
-
+Similar to Shazam, Audible Magic has a large collection of data that allows users to query audio from video files such as TV shows and movies and provide pay per use SDKs. Most of their utility comes from having a large collection of data and having large amount of fingerprints that they leverage as a service. Although open source databases containing audio fingerprints are readily available online, video fingerprinting does not have the same amount of open data. \\
 
 \section{System Overview}
 \label{sec:system-overview}
-The Librarian is architected to accept jobs over a local HTTP server and ingest them into the system. A job consists of a single entity to be identified. Following the flow of Figure \ref{fig:system-overview} a job is first queued and then consumed by a worker process. Worker processes then identify the entity type and apply the handler for this type. The system currently only accepts movie entities, however this can extended to allow multiple handlers by using file extensions to differentiate entity types. A handler type then performs two steps to ingest the entity, first a deduplication step, and if the entity is not a duplicate, an identification step. Deduplication looks at the internal metadata store of The Librarian whereas identification looks at outside sources to establish ground truth. The details of these algorithms are discussed further for the movie entity type. \\
 
-data added to metastore, job id maps to metadata id
+The Librarian is architected to accept jobs over a local HTTP Python Flask server and ingest them into the system. A job consists of a single entity to be identified. Following the flow of Figure \ref{fig:system-overview} a job is first queued and then consumed by a worker process. Worker processes then identify the entity type and apply the handler for this type. The system currently only accepts movie entities, however, this can extended to allow multiple handlers by using file extensions to differentiate entity types. A handler type then performs two steps to ingest the entity, first a deduplication step, and if the entity is not a duplicate, an identification step. Deduplication looks at the internal metadata store of The Librarian whereas identification looks at outside sources to establish ground truth. \\
+
+
+\begin{figure}[H]
+\center\includegraphics[scale=0.75]{system-overview.png}
+\caption{The Librarian System Overview. Entity request start the flow through the system by 1. Creating a job for an entity. 2. Applying a handler for the entity. 3. Trying to identify the entity by deduplication or entity specific identifier method.}
+\label{fig:system-overview}
+\end{figure}
+
+
+After deduplication or identification the job is linked to an item in the metadata store. The metadata store and job store are backed by a MongoDB database. This was chosen to allow the flexible schemas easily during development and direct storage or JSON objects obtained by external APIs. The job store can be queried with a job identification number for updates on the progress in the system or to place a modification request to manually update the metadata associated with an entity. \\
 
 %------------------------------------------------
 
@@ -148,6 +153,12 @@ The title identification process was developed using the corpus of seed data. Us
 
 Once the string is clean we use an internal database of film names to find potential matches to query against online sources. This is allows an arbitrary amount of fuzzy matching by querying the local database and avoids any rate limiting issues when making requests to online sources. This also allows us to match a cleaned string to a valid string since the local datastore was scraped from the same online sources that are queried. \\
 
+\begin{figure}[H]
+\center\includegraphics[scale=0.75]{title-identifier.png}
+\caption{Netflix Home Screen. The first film display has the resume option (play icon overlay).}
+\label{fig:title-identifier}
+\end{figure}
+
 
 \subsubsection{Credit Identifiers}
 \label{sec:credit-identifier}
@@ -159,6 +170,13 @@ This method proved to be the most computationally expensive and required heavy o
 Some optimizations for this fuzzy matching process were restricting the number of choices by finding the intersection of matches between first and last name instead of searching for a first name last name string together. Additionally, since the credit frames are ordered with the leading actors first, the OCR is performed in a streaming fashion since an intersection of a single film can likely be found within the first several frames which contains the leading actors. \\
 
 The tokens extracted from the credit frames are queried against a local datastore of actor names for the same performance reasons as the title identifier. This ground truth data was scraped from the TMDB and OMDB apis and contains approximately 400,000 actor names. Moving the implementation to a compiled language may show better results since the performance costs will be lower and some of these optimization methods have the potential to miss potential matches if the heuristic is too strict. \\
+
+\begin{figure}[H]
+\center\includegraphics[scale=0.75]{credit-identifier.png}
+\caption{Netflix Home Screen. The first film display has the resume option (play icon overlay).}
+\label{fig:credit-identifier}
+\end{figure}
+
 
 \section{Performance}
 \label{sec:performance}

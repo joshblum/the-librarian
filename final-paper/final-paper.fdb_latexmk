@@ -1,5 +1,8 @@
 # Fdb version 3
-["pdflatex"] 1386661963 "final-paper.tex" "final-paper.pdf" "final-paper" 1386661964
+["pdflatex"] 1386667440 "final-paper.tex" "final-paper.pdf" "final-paper" 1386667441
+  "./graphics/credit-identifier.png" 1386666144 29717 b083d9d77dfa2f06a8f09df49f6564a9 ""
+  "./graphics/system-overview.png" 1386666132 63912 08b4850a3b686e9d652b38ed41200b1d ""
+  "./graphics/title-identifier.png" 1386666478 27096 a54b00cb173e53c39751b139dba16fb7 ""
   "/usr/local/texlive/2012/texmf-dist/tex/context/base/supp-pdf.mkii" 1337017135 71627 94eb9990bed73c364d7f53f960cc8c5b ""
   "/usr/local/texlive/2012/texmf-dist/tex/generic/babel/babel.def" 1312409092 29228 2fe939254f4b17ac18a8c0fb8aa39dff ""
   "/usr/local/texlive/2012/texmf-dist/tex/generic/babel/babel.sty" 1312409092 9157 414843659be58197b1510e2317ef76d9 ""
@@ -59,8 +62,8 @@
   "/usr/local/texlive/2012/texmf-dist/tex/latex/pdftex-def/pdftex.def" 1306616590 55368 3c8a0d99822330f2dfabc0dfb09ce897 ""
   "/usr/local/texlive/2012/texmf-dist/tex/latex/sectsty/sectsty.sty" 1137110779 22423 d476012cd03f82f9475ad54ba6cd3267 ""
   "/usr/local/texlive/2012/texmf-dist/tex/latex/wrapfig/wrapfig.sty" 1137111090 26220 3701aebf80ccdef248c0c20dd062fea9 ""
-  "final-paper.aux" 1386661964 1878 e7a83acc30089f3f08146109be987922 ""
-  "final-paper.tex" 1386661962 16616 6ad1d9bebd293af3da4a08d06812d960 ""
+  "final-paper.aux" 1386667441 2654 56a041aab56d15d5f30d1c675f6de619 ""
+  "final-paper.tex" 1386667436 18174 8b787945f4c0ab0f3fd29905a22d20d9 ""
   (generated)
   "final-paper.pdf"
   "final-paper.log"
