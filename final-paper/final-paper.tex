@@ -75,13 +75,13 @@
 
 \maketitle % Print the title
 
-\section{Introduction and Motivation}
+\section{Motivation}
 %------------------------------------------------
 Entity matching is nontrivial and especially difficult when each entity is large. The Librarian aims to perform automatic entity resolution across various media types. Given sets of text, audio, image, and video files, The Librarian can merge the sets of entities by deduplicating the files, gathering metadata from trusted sources, (i.e. IMDB, Rotten Tomato, and Spotify APIs), and categorizing the media based on the metadata that is found. \\
 
 The motivation behind the system is to be able to handle large dumps of data as well as incremental updates over a large corpus of files with many contributers. The Librarian serves as a background system upon which clients can be built which handler user interaction to add and modify data within the system.\\
 
-The initial system has been tested with approximately 6 TB of seed data that has been collected from several sources. This data was used as training data for testing and developing our matching algorithms. Only movie entities were categorized from this corpus, although the matching algorithms can be extended to work with other media types such as audio, image, or text files.
+The initial system has been tested with approximately 6 TB of seed data that has been collected from several sources. This data was used as training data for testing and developing our matching algorithms. Only movie entities were categorized from this corpus, although the matching algorithms can be extended to work with other media types such as audio, image, or text files. \\
 
 In addition to trying to algorithmically resolve two entities, crowd sourcing is used to establish ground truth where necessary. If there are multiple matches for a single entity a user can select the correct metadata for the entity or input their own.\\
 
@@ -91,16 +91,16 @@ We begin by discussing related work (\ref{sec:related-work}), providing a system
 \label{sec:related-work}
 %------------------------------------------------
 
-\section{Shazam}
+\subsection{Shazam}
 \label{sec:shazam}
 
-Shazam is a widely known service that specializes in identifying songs. Shazam has the ability to create audio fingerprints from given audio files or samples. They initially built a large database of audio fingerprints from thousands of sounds to use as ground truth. 
+Shazam is a widely known service that specializes in identifying songs. Shazam has the ability to create audio fingerprints from given audio files or samples. They initially built a large database of audio fingerprints from thousands of sounds to use as ground truth. \\
 
-They then query users for a 10 second audio sample, and they are able to generate an audio fingerprint from these and cross-match with their large data sample. An important part of their service is that they have the ability to use the service even with background noise. Shazam uses different filtering algorithms to reduce background noise and get better samples. 
+They then query users for a 10 second audio sample, and they are able to generate an audio fingerprint from these and cross-match with their large data sample. An important part of their service is that they have the ability to use the service even with background noise. Shazam uses different filtering algorithms to reduce background noise and get better samples. \\
 
 Additionally, in order to prevent enormous data storage - (think every song times large amount of time sliding windows) they developed a method of fingerprinting audio samples based on tone intensity, which allowed them to get more representative fingerprints.
 
-\section{Audible Magic}
+\subsection{Audible Magic}
 \label{sec:audible-magic}
 
 Similar to Shazam, Audible Magic created a large collection of data that allows users to query audio from video files such as TV shows and movies. They also provide certain SDKs for a price, but those prices were too high for us to consider using. Most of their utility comes from having a large collection of data and having large amount of fingerprints that they leverage as a service. Although open source databases containing audio fingerprints are readily available online, video fingerprinting does not have the same amount of open data that is readily available.
@@ -167,12 +167,12 @@ The tokens extracted from the credit frames are queried against a local datastor
 %------------------------------------------------
 
 %------------------------------------------------
-\subsubsection{Handlers}
+\subsection{Handlers}
 \label{sec:handlers}
 %TODO
 
 %------------------------------------------------
-\subsubsection{Identifiers}
+\subsection{Identifiers}
 \label{sec:identifiers}
 %TODO
 
@@ -181,7 +181,19 @@ The tokens extracted from the credit frames are queried against a local datastor
 
 \section{Future Work}
 \label{sec:future-work}
-%TODO
+
+The librarian was designed to be easily extended. Just as we currently have Movie Handlers, the librarian can handle text files, audio files, and TV shows as well. \\
+
+Although not currently part of the system, crowd sourcing would be very valuable in this kind of system. Having the ability for users to report mistakes would be great in cases where the librarian fails to correctly identify an entity. \\
+
+Ideally the librarian would have the ability to manage the whole media server. On a very basic level that means having the ability to move files. We would extend that functionality to be able to specify some configuration file which would be able to specify different entity types and the correct way to categorize them. \\
+
+We also plan to add a client that is able to interact with different sources of files and have the ability to prompt the librarian to handle new files. For example, having a torrent client that downloads files into the system and then have the librarian deal with deduping, identifying, and correctly indexing the file. \\
+
+In addition to adding more features there is room for optimization. Given enough data on our identifiers, in the future we can prioritize them differently to obtain higher precision. \\
+
+It's possible to move some of the code to a compiled language to improve performance, which would allow some of our heuristics (e.g: Credit Identifier) to not only take less time but also to have better accuracy. \\ 
+
 
 %------------------------------------------------
 \section{Conclusions}
