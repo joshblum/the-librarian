@@ -92,7 +92,19 @@ We begin by discussing related work (\ref{sec:related-work}), providing a system
 \label{sec:related-work}
 %TODO NOLANDDDDD
 %------------------------------------------------
-Audio Fingerprinting: 
+Shazam
+
+Shazam is a widely known service that specializes in identifying songs. Shazam has the ability to create audio fingerprints from given audio files or samples. They initially built a large database of audio fingerprints from thousands of sounds to use as ground truth. 
+
+They then query users for a 10 second audio sample, and they are able to generate an audio fingerprint from these and cross-match with their large data sample. An important part of their service is that they have the ability to use the service even with background noise. Shazam uses different filtering algorithms to reduce background noise and get better samples. 
+
+Additionally, in order to prevent enourmous data storage - (think every song times large amount of time sliding windows) 
+
+Audible Magic [ music/tv audio fingerprinting ]
+
+
+
+
 \section{System Overview}
 \label{sec:system-overview}
 

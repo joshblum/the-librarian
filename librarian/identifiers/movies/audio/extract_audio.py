@@ -41,7 +41,6 @@ def extract_audio(input_name, output_name):
 
 def run_echoprint(input_name):
     cmd = "echoprint-codegen %(filename)s" % {
-        "path" : ROOT_PATH,
         "filename": input_name
     }
     return subprocess.check_output(shlex.split(cmd), stderr=subprocess.STDOUT)
