@@ -46,7 +46,6 @@ def cut_vid(inname, outname, start_time, end_time):
         'start_time': start_time,
         'end_time': end_time,
     }
-    print 'cmd', cmd
     return subprocess.check_output(shlex.split(cmd))
 
 

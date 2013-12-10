@@ -55,7 +55,7 @@ class Handler(object):
             return
 
         self.md5 = self.get_content_hash()
-        self.fingerprint = None  # self.get_content_fingerprint()
+        self.fingerprint = self.get_content_fingerprint()
 
         logger.debug("Updating job %s" % self.job_id)
 
@@ -70,7 +70,7 @@ class Handler(object):
 
         if self.srcfile is None:  # job failed
             return
-        
+
         self.update_progress(JOB_INPROGRESS)
 
         progress = JOB_COMPLETED
@@ -240,7 +240,7 @@ class MovieHandler(Handler):
         """
         default_args = (self.srcfile, self.path)
         dup_detectors = [(HashIdentifier, (self.srcfile, self.path, self.md5)),
-                         #                     (MovieAudioIdentifier, default_args),
+                         (MovieAudioIdentifier, default_args),
                          ]
         for detector, args in dup_detectors:
             logger.debug("Running dedup detector %s with args %s" %
