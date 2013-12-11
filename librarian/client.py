@@ -6,7 +6,7 @@ import logging.config
 logging.config.dictConfig(LOGGING)
 logger = logging.getLogger(__name__)
 
-PATH = "/bomber/media/shrap/justing/Movies"#"/bomber/media/Movies/Other/"
+PATH = "/bomber/media/shrap/justing/Movies/"#"/bomber/media/Movies/Other/"
 URL = "http://%s:%s" % (HOST, PORT)
 
 
