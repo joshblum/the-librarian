@@ -1,5 +1,5 @@
 # Fdb version 3
-["pdflatex"] 1386733845 "final-paper.tex" "final-paper.pdf" "final-paper" 1386734261
+["pdflatex"] 1386815148 "final-paper.tex" "final-paper.pdf" "final-paper" 1386815738
   "./graphics/credit-identifier.png" 1386666144 29717 b083d9d77dfa2f06a8f09df49f6564a9 ""
   "./graphics/system-overview.png" 1386666132 63912 08b4850a3b686e9d652b38ed41200b1d ""
   "./graphics/title-identifier.png" 1386732213 27133 e1616557e73febe4856a30503777bc10 ""
@@ -62,8 +62,8 @@
   "/usr/local/texlive/2012/texmf-dist/tex/latex/pdftex-def/pdftex.def" 1306616590 55368 3c8a0d99822330f2dfabc0dfb09ce897 ""
   "/usr/local/texlive/2012/texmf-dist/tex/latex/sectsty/sectsty.sty" 1137110779 22423 d476012cd03f82f9475ad54ba6cd3267 ""
   "/usr/local/texlive/2012/texmf-dist/tex/latex/wrapfig/wrapfig.sty" 1137111090 26220 3701aebf80ccdef248c0c20dd062fea9 ""
-  "final-paper.aux" 1386733846 3060 024876cbedda7c7fa161f172fa43badb ""
-  "final-paper.tex" 1386734260 21366 28ed8e3c2797867b92e540641ebfea0d ""
+  "final-paper.aux" 1386815149 3549 a69a825b4f4da241efd699e85e2f3041 ""
+  "final-paper.tex" 1386815148 22577 fb880d38b718f81cadb0c28f9d531c33 ""
   (generated)
   "final-paper.pdf"
   "final-paper.log"
