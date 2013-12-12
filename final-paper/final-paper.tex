@@ -182,27 +182,20 @@ Since the credit frames are ordered with the leading actors first, another optim
 
 The system was tested by ingesting two different sets of seed data totaling approximately 2 TB which consisted entirely of movie entity files. We begin by discussing the overall performance of the system on the seed data and then analyze the performance and accuracy of the title and credit identifiers. Due to the extended running time across the entire dataset, the system was only able to be tested fully once. There is high potential in future work for improving the performance with minor modifications to address the issues that we discovered. \\
 
-This data set consisted of approximately 1000 entities, of which 702 of the jobs completed. In this first iteration of the system a single entity was expected for each queued job so many of the failed jobs were due to multiple files being queued for a single job. The seed data contained many series or trilogies of films which were grouped together. In addition 
+This data set consisted of approximately 1000 entities, of which 702 of the jobs completed. In this first iteration of the system a single entity was expected for each queued job so many of the failed jobs were due to multiple files being queued for a single job. The seed data contained many series or trilogies of films which were grouped together causing multiple files to be contained in what was believed to be one entity. In addition, some of the jobs failed since the film was split into two files. Future iterations of the handler would be more robust to determine if multiple entities were present (such as a series) or if the two files should be joined into one. \\
+
+The runtime of the entire corpus took approximately 20 hours. This runtime encompasses the entire process of queuing jobs, computing the md5 hash, audio fingerprint, title identification, and credit identification. The system was run on an AMD A6-6400K 1.8GHz APU with Radeon(tm) HD Graphics and 4GB of RAM and 4 worker processes to consume jobs. On average the deduplication process took 55.21 seconds to run, with the audio fingerprint computation taking almost the entire computation time. \\
 
 %------------------------------------------------
 \subsection{Identifiers}
 \label{sec:identifiers-performance}
+Using the output logs of The Librarian and the data from the metadata store, we found that the title identifier ran on average in 15.29 seconds. This time includes the entire process of fuzzy matching and network requests to outside sources. The credit identifier took 231.53 seconds on average from start to finish. Out of the 702 entities successfully processed, only 232 were identified. \\
 
-\subsubsection{Title Identifier}
-\label{sec:title-identifier-performance}
+184 of these entities were identified by the title identifier, and 67 were found by the credit identifier identified 67. 19 entities were successfully matching using both identification methods. The 35\% success rate is significantly lower than expected, however, with minor modifications to the system this can be greatly increased. \\
 
-\paragraph{Performance}
+A possible reason for the low identification rate is some of the heuristics are too stringent. For both credit and title matching, at the cost of more computation, making less stringent heuristics will likely yield a higher identification rate. The scope of the project did not allow for fine tuning of the identification algorithms, so many of the design choices were made with limited training data examples. For credit identification it is possible that some credit sequences are longer than 5 minutes, in which case it is unlikely that a match would be found with the less well known actors. \\
 
-\paragraph{Accuracy}
-
-\subsubsection{Credit Identifier}
-\label{sec:credit-identifier-performance}
-
-\paragraph{Performance}
-
-\paragraph{Accuracy}
-
-
+Perhaps the main reason for the small number of identifications is the use of local ground truth data. Both the title and credit identifiers use local databases to normalize their queries before contacting an external API. Due to the number of queries on average (up to several thousand for fuzzy credit matching), this was a necessary optimization for this iteration. The problem with this is the local store is now a bottleneck for the search, since a valid string may be invalidated if the local store is missing an entry. \\
 
 %------------------------------------------------
 
