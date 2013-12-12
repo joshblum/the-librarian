@@ -83,7 +83,7 @@ The motivation behind the system is to handle large dumps of data as well as inc
 
 The initial system has been tested with approximately 2 TB of seed data that has been collected from several sources. This data was used as training data for testing and developing our identification algorithms. Only movie entities were categorized from this corpus, although the matching algorithms can be extended to work with other media entity types. The design discusses these possible extensions, although the actual implementation of these handlers will be part of future work.\\
 
-In addition to trying to resolve two entities algorithmically, crowd sourcing can be used to establish ground truth where necessary. If there are multiple matches for a single entity, a user can select the correct metadata for the entity or input their own. The Librarian offers a network interface for modifications to the metadata it collects by which a crowd sourcing client could interact with.\\
+In addition to trying to resolve two entities algorithmically, crowd sourcing can be used to establish ground truth where necessary. If there are multiple matches for a single entity, a user can select the correct metadata for the entity or input their own. The Librarian offers a network interface for modifications to the metadata which a crowd sourcing client could be built on.\\
 
 We begin by discussing related work (\ref{sec:related-work}), providing a system design overview (\ref{sec:system-overview}), showing an analysis of the system's performance (\ref{sec:evaluation}), list goals for future work (\ref{sec:future-work}), and discuss the conclusions of the project (\ref{sec:conclusion}).
 
@@ -96,7 +96,7 @@ We begin by discussing related work (\ref{sec:related-work}), providing a system
 
 Shazam is a widely known service that specializes in identifying songs by creating audio fingerprints from (noisy) audio samples. By using a large seed database of fingerprints, Shazam is able to establish ground truth for their matching. \\
 
-Users provide a ten second audio sample to be fingerprinted and matched against their data set. An important part of their service is that they have the ability to use the service even with background noise. Shazam uses different filtering algorithms to reduce background noise and get better samples. Shazam also optimizes storage costs by fingerprinting audio samples based on tone intensity, which allowed them to get more representative fingerprints. \\
+Users provide a ten second audio sample to be fingerprinted and matched against their data set. An important part of their service is that they have the ability to use the service even with background noise. Shazam uses different filtering algorithms to reduce background noise and get better samples. Shazam also optimizes storage costs by fingerprinting audio samples based on tone intensity, which allows them to get more representative fingerprints. \\
 
 \subsection{Audible Magic}
 \label{sec:audible-magic}
@@ -116,7 +116,7 @@ The Librarian is architected to accept jobs over a local HTTP Python Flask serve
 \end{figure}
 
 
-After deduplication or identification the job is linked to an object in the metadata store. The metadata store and job store are backed by a MongoDB database. This was chosen to allow flexible schemas during development and direct storage of JSON objects obtained by external APIs. The job store can be queried with a job identification number for updates on the progress in the system or to place a modification request to manually update the metadata associated with an entity. \\
+After deduplication or identification, the job is linked to an object in the metadata store. The metadata store and job store are backed by a MongoDB database. This was chosen to allow flexible schemas during development and direct storage of JSON objects obtained by external APIs. The job store can be queried with a job identification number for updates on the progress in the system or to place a modification request to manually update the metadata associated with an entity. \\
 
 %------------------------------------------------
 
@@ -130,19 +130,19 @@ The deduplication process for movie entities consists of two steps. First, an md
 
 Audio fingerprinting also has a large potential for identifying files, but requires extensive ground truth data. Shazam and Audible Magic are good examples of such services, however, their services are closed or pay per use. During the design stage we looked into fingerprinting movie trailers and checking increments of the films against these fingerprints. Yet, after some research, this method did not seem either computationally efficient nor feasible since the fingerprint requires a minimum duration of approximately ten seconds to effectively match an entity. \\
 
-Although we were not able to use audio fingerprinting for identifying new files, because we lacked ground truth data, fingerprinting proved quite effective for deduplication. We used the open source audio fingerprinting system Echoprint together with ffmpeg to extract the audio from video files and generate fingerprints. This method is very robust for deduplication since the fingerprinting algorithms allow noisy matching making this method much more flexible than simple content hashing. \\
+Although we were not able to use audio fingerprinting for identifying new files because we lacked ground truth data, fingerprinting proved quite effective for deduplication. We used the open source audio fingerprinting system Echoprint together with ffmpeg to extract the audio from video files and generate fingerprints. This method is very robust for deduplication since the fingerprinting algorithms allow noisy matching, making this method much more flexible than simple content hashing. \\
 
 
 %------------------------------------------------
 
 \subsection{Identification}
 \label{sec:identification}
-Unlike deduplication, identification is used to establish the identity of a file by looking at outside sources. These sources are assumed to have valid ground truth data which can be queried based on an certain features of the file. For movie entities, the identification methods return a set of possible titles to query outside sources for metadata. For analysis purposes, all identification methods were used when matching an entity, but in future iterations, once identity is established the handler can return after a single positive identification. This design allows the author of a handler to prioritize how different identification methods are run to optimize for performance. To establish the identity of movies two identifiers were used, title identifiers and credit identifiers. \\
+Unlike deduplication, identification is used to establish the identity of a file by looking at outside sources. These sources are assumed to have valid ground truth data which can be queried based on certain features of the file. For movie entities, the identification methods return a set of possible titles to query outside sources for metadata. For analysis purposes, all identification methods were used when matching an entity. In future iterations, once identity is established, the handler can return after a single positive identification. This design allows the author of a handler to prioritize how different identification methods are run to optimize for performance. To establish the identity of movies two identifiers were used, title identifiers and credit identifiers. \\
 
 \subsubsection{Title Identifiers}
 \label{sec:title-identifier}
 
-The title identification algorithm flow is shown in Figure \ref{fig:title-identifier}. First, the title is tokenized by splitting the string on alphanumerics and we attempt to extract year information, if present. After removing any stop words, the cleaned title is checked against an internal database of known movie titles. Exact and a fuzzy matches are performed with the cleaned title. Possible matches are then queried against online sources, such as IMDB, to acquire identity metadata. \\
+The flow if the title identification algorithm is shown in Figure \ref{fig:title-identifier}. First, the title is tokenized by splitting the string on alphanumerics and we attempt to extract year information, if present. After removing any stop words, the cleaned title is checked against an internal database of known movie titles. Exact and a fuzzy matches are performed with the cleaned title. Possible matches are then queried against online sources, such as IMDB, to acquire identity metadata. \\
 
 
 \begin{figure}[H]
@@ -159,7 +159,7 @@ Once the tokenized string is clean, an internal database of film names is used t
 \subsubsection{Credit Identifiers}
 \label{sec:credit-identifier}
 
-For many files in the initial corpus, titles were parsed successfully at a high rate since the data was relatively clean, however, the method is very brittle and can easily deliver false positives if a file is slightly misnamed or comes from a dirty source. To match entities more effectively, the credit identification method was implemented. This method performs optical character recognition (OCR) on the credits of a film and tries to extract actor names from the text. These names can then be queried against an online source and the intersection of the films the actors appear in can be used to establish identity. \\
+For many files in the initial corpus, titles were parsed successfully at a high rate since the data was relatively clean, however, the method is very brittle and can easily deliver false positives if a file is slightly misnamed or comes from a dirty source. To match entities more effectively, the credit identification method was implemented. This method performs optical character recognition (OCR) on the credits of a film and tries to extract actor names from the text. These names can then be queried against an online source and the intersection of the films in which the actors appear can be used to establish identity. \\
 
 Figure \ref{fig:credit-identifier} outlines the credit identification algorithm. The film is cut to contain only the last five minutes of video and then a frame is generated every three seconds. Using the Tesseract library to perform OCR, raw text from each frame is extracted and then heuristically cleaned, reducing potential search tokens. Normalized text is generated by querying a local actors database to match a token to an actor and then a set of the actor's films are found from external APIs. The identifier returns a set of the intersection of films from the actors found. \\
 
@@ -171,7 +171,7 @@ Figure \ref{fig:credit-identifier} outlines the credit identification algorithm.
 \end{figure}
 
 
-This method proved to be the most computationally expensive and required extensive optimizations to get an operational prototype implementation. The raw text from the OCR can produce many false results which cause the runtime of the fuzzy searching to take on the order of tens of minutes. To reduce this runtime, tokens are eliminated by several heuristics such as length and removing excluded characters. The fuzzy searching queries an in-memory SQLite database of known actor names and uses the Python FuzzyWuzzy library to score matches. \\
+This method proved to be the most computationally expensive and required extensive optimizations to get an operational prototype implementation. The raw text from the OCR can produce many false results which cause the runtime of the fuzzy searching to reach the order of tens of minutes. To reduce this runtime, tokens are eliminated by several heuristics such as length and removing excluded characters. The fuzzy searching queries an in-memory SQLite database of known actor names and uses the Python FuzzyWuzzy library to score matches. \\
 
 Some optimizations for this fuzzy matching process were first trying an exact match and then restricting the number of choices by finding the intersection of matches between first and last name instead of searching for a first name last name string together. The tokens extracted from the credit frames are queried against a local datastore of actor names for the same performance reasons as the title identifier. This ground truth data was scraped from the TMDB and OMDB APIs and contains approximately 450,000 actor names. \\
 
@@ -180,20 +180,20 @@ Since the credit frames are ordered with the leading actors first, another optim
 \section{Evaluation}
 \label{sec:evaluation}
 
-The system was tested by ingesting two different sets of seed data totaling approximately 2 TB which consisted entirely of movie entity files. We begin by discussing the overall performance of the system on the seed data and then analyze the performance and accuracy of the title and credit identifiers. Due to the extended running time across the entire dataset, the system was only able to be tested fully once. There is high potential in future work for improving the performance with minor modifications to address the issues that we discovered. \\
+The system was tested by ingesting two different sets of seed data totaling approximately 2 TB consisting entirely of movie entity files. We begin by discussing the overall performance of the system on the seed data and then analyzing the performance and accuracy of the title and credit identifiers. Due to the extended running time across the entire dataset, the system was only able to be tested fully once. There is high potential in future work for improving the performance with minor modifications to address the issues that we discovered. \\
 
-This data set consisted of approximately 1000 entities, of which 702 of the jobs completed. In this first iteration of the system a single entity was expected for each queued job so many of the failed jobs were due to multiple files being queued for a single job. The seed data contained many series or trilogies of films which were grouped together causing multiple files to be contained in what was believed to be one entity. In addition, some of the jobs failed since the film was split into two files. Future iterations of the handler would be more robust to determine if multiple entities were present (such as a series) or if the two files should be joined into one. \\
+This data set consisted of approximately 1000 entities, of which 702 of the jobs completed. In this first iteration of the system a single entity was expected for each queued job, so many of the failed jobs were due to multiple files being queued for a single job. The seed data contained many series or trilogies of films which were grouped together causing multiple files to be contained in what was believed to be one entity. In addition, some of the jobs failed since the film was split into two files. Future iterations of the handler would be more robust to determine if multiple entities were present (such as a series) or if the two files should be joined into one. \\
 
-The runtime of the entire corpus took approximately 20 hours. This runtime encompasses the entire process of queuing jobs, computing the md5 hash, audio fingerprint, title identification, and credit identification. The system was run on an AMD A6-6400K 1.8GHz APU with Radeon(tm) HD Graphics and 4GB of RAM and 4 worker processes to consume jobs. On average the deduplication process took 55.21 seconds to run, with the audio fingerprint computation taking almost the entire computation time. \\
+The runtime of the entire corpus took approximately 20 hours. This runtime encompasses the entire process of queuing jobs, computing the md5 hash, audio fingerprint, title identification, and credit identification. The system was run on an AMD A6-6400K 1.8GHz APU with Radeon(tm) HD Graphics and 4GB of RAM and 4 worker processes to consume jobs. On average, the deduplication process took 55.21 seconds to run, with the audio fingerprint computation taking almost the entire computation time. \\
 
 %------------------------------------------------
 \subsection{Identifiers}
 \label{sec:identifiers-performance}
 Using the output logs of The Librarian and the data from the metadata store, we found that the title identifier ran on average in 15.29 seconds. This time includes the entire process of fuzzy matching and network requests to outside sources. The credit identifier took 231.53 seconds on average from start to finish. Out of the 702 entities successfully processed, only 232 were identified. \\
 
-184 of these entities were identified by the title identifier, and 67 were found by the credit identifier. 19 entities were successfully matching using both identification methods. The 35\% success rate is significantly lower than expected, however, with minor modifications to the system, we believe this rate can be greatly increased. \\
+184 of these entities were identified by the title identifier, and 67 were found by the credit identifier. 19 entities were successfully matched using both identification methods. The 35\% success rate is significantly lower than expected, however, with minor modifications to the system, we believe this rate can be greatly increased. \\
 
-A possible reason for the low identification rate is some of the heuristics are too stringent. For both credit and title matching, at the cost of more computation, making less stringent heuristics will likely yield a higher identification rate. This would entail a larger search of possible tokens or lowering the threshold score of a fuzzy match. The scope of the project did not allow for fine tuning of the identification algorithms -- many of the design choices were made with limited training data examples. For credit identification it is also possible that some credit sequences are longer than 5 minutes, in which case it is unlikely that a match would be found with the less well known actors. \\
+A possible reason for the low identification rate is that some of the heuristics are too stringent. For both credit and title matching, making less stringent heuristics will likely yield a higher identification rate. This would entail a larger search of possible tokens or lowering the threshold score of a fuzzy match. The scope of the project did not allow for fine tuning of the identification algorithms -- many of the design choices were made with limited training data examples. For credit identification, it is also possible that some credit sequences are longer than 5 minutes, in which case it is unlikely that a match would be found with the less well known actors. \\
 
 Perhaps the main reason for the small number of successful identifications is the use of local ground truth data. Both the title and credit identifiers use local databases to normalize their queries before contacting an external API. Due to the number of queries on average (up to several thousand for fuzzy credit matching), this was a necessary optimization for this implementation. The problem with this is the local store is now a bottleneck for the search, since a valid string may be invalidated if the local store is missing an entry. \\
 
@@ -208,7 +208,7 @@ The Librarian was designed to be easily extended to additional entity types. Usi
 
 \subsection{Clients}
 \label{sec:clients}
-Another design point of The Librarian was to allow clients to be built upon it. Some possible clients would allow entity gathering, a crowd sourcing resolution layer, or a media display server. \\
+Another design feature of The Librarian was to allow clients to be built upon it. Some possible clients would allow entity gathering, a crowd sourcing resolution layer, or a media display server. \\
 
 An entity gathering client would support receiving a link to a file, for example from Dropbox or a torrent file and then presenting this file to The Librarian for identification. Such a client fits the initial motivation for building The Librarian since the client would allow many users to add to a media store with large updates or incremental additions to a data set. \\
 
