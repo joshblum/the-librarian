@@ -228,7 +228,7 @@ class MovieHandler(Handler):
         logger.debug("Found files %s" % files)
         for path in files:
             split_path = path.split(".")
-            if len(split_path) and split_path[-1] in VIDEO_EXT:
+            if len(split_path) and split_path[-1].lower() in VIDEO_EXT:
                 srcfiles.append(path)
 
         if len(srcfiles) == 1:
