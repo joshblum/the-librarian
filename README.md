@@ -1,4 +1,4 @@
 The Librarian
 =============
 
-Entity Matching Across Media Types
+Entity Identification Across Media Types
