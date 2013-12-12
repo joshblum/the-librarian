@@ -32,6 +32,7 @@
 \usepackage{float}
 
 \usepackage[top=.9in, bottom=.9in, left=1in, right=1in]{geometry}
+\usepackage{hyperref}
 
 \usepackage{sectsty} % Allows customizing section commands
 \allsectionsfont{\normalfont\scshape} % Make all sections centered, the default font and small caps
@@ -229,7 +230,7 @@ The Librarian provides a framework for parallelized entity identification across
 
 This implementation showed a proof of concept for the system by implementing a movie identification handler. The handler used hashing and audio fingerprinting to deduplicate entities and with title and credit identification methods to establish initial ground truth. On the initial seed data of 2 TB of movie files, the movie handler proved to be more successful than credit identification. \\
 
-The future work will bring additional functionality to the system by providing more handlers and making the current methods more robust. Open sourcing the project is the final goal to allow others to build clients upon the system and provide an open way to automatically identify media entities. \\
+The future work will bring additional functionality to the system by providing more handlers and making the current methods more robust. Open sourcing the project is the final goal to allow others to build clients upon the system and provide an open way to automatically identify media entities. The code is publicly available at \url{https://github.com/joshblum/the-librarian} .\\
 
 %------------------------------------------------
 
